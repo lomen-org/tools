@@ -23,9 +23,9 @@ class BaseTool:
 class BasePlugin:
     """Base class for all Lomen plugins."""
 
-    def __init__(self, credentials: Dict[str, Any]):
+    def __init__(self, credentials: Optional[Dict[str, Any]] = None):
         """Initialize the plugin with the given credentials."""
-        self.credentials = credentials
+        self.credentials = credentials or {}
         self._validate_credentials()
 
     @property

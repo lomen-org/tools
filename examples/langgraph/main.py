@@ -26,8 +26,8 @@ class AgentState(TypedDict):
     tools: Annotated[Sequence[BaseTool], "Tools the agent has access to"]
 
 
-# Initialize the plugins
-evm_rpc_plugin = EvmRpcPlugin(credentials={"RPC_URL": os.getenv("RPC_URL")})
+# Initialize the plugins - no credentials needed for EVM RPC
+evm_rpc_plugin = EvmRpcPlugin()
 
 # Get all tools in LangChain format
 all_tools = []

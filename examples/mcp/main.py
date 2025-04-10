@@ -1,10 +1,6 @@
 """Main example using Lomen plugins with MCP."""
 
-import os
-
-from fastapi import FastAPI
 from mcp.server.fastmcp import FastMCP
-from starlette.middleware.cors import CORSMiddleware
 
 # Import the plugins
 from lomen.plugins.evm_rpc import EvmRpcPlugin
@@ -14,8 +10,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Initialize the plugins
-evm_rpc_plugin = EvmRpcPlugin(credentials={"RPC_URL": os.getenv("RPC_URL")})
+# Initialize the plugins - no credentials needed for EVM RPC
+evm_rpc_plugin = EvmRpcPlugin()
 
 # Initialize the MCP server
 mcp_server = FastMCP("lomen")
