@@ -17,8 +17,9 @@ class TestTool(BaseTool):
         value: str
 
     @classmethod
-    def execute(cls, params: Dict[str, Any], credentials: Dict[str, Any]) -> str:
-        return f"Executed with {params['value']} and {credentials['API_KEY']}"
+    def execute(cls, params: Params, credentials: Dict[str, Any]) -> str:
+        """Execute the test tool with params and credentials."""
+        return f"Executed with {params.value} and {credentials['API_KEY']}"
 
 
 def test_langchain_adapter_conversion():

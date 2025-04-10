@@ -8,7 +8,9 @@ from lomen.adapters.mcp import MCPAdapter
 from lomen.plugins.base import BaseTool
 
 
-class TestParams(BaseModel):
+# This is a test model, not a test case - rename to fix the warning
+class ParamsModel(BaseModel):
+    """Parameters model for testing."""
     value: str
 
 
@@ -21,8 +23,9 @@ class TestTool(BaseTool):
         value: str
 
     @classmethod
-    def execute(cls, params: Dict[str, Any], credentials: Dict[str, Any]) -> str:
-        return f"Executed with {params['value']} and {credentials['API_KEY']}"
+    def execute(cls, params: Params, credentials: Dict[str, Any]) -> str:
+        """Execute the test tool with params and credentials."""
+        return f"Executed with {params.value} and {credentials['API_KEY']}"
 
 
 def test_mcp_adapter_conversion():
