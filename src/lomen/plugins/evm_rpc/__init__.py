@@ -3,11 +3,18 @@
 from typing import List, Type
 
 from ..base import BasePlugin, BaseTool
+
+# Import after defining the class to avoid circular imports
 from .tools import GetBlockNumberTool, GetBlockTool
 
 
 class EvmRpcPlugin(BasePlugin):
-    """Plugin for EVM RPC operations."""
+    """Plugin for EVM RPC operations with Ethereum and other EVM-compatible blockchains.
+
+    This plugin provides tools for interacting with EVM-based blockchains such as Ethereum,
+    Polygon, Arbitrum, and others. It handles the connection to the blockchain via RPC
+    and provides various tools for querying blockchain data.
+    """
 
     @property
     def name(self) -> str:

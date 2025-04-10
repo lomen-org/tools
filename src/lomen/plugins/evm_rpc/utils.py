@@ -1,15 +1,16 @@
 """Utility functions for EVM RPC tools."""
 
+from typing import Optional
 from web3 import Web3
 
 # Default RPC URL to use if not provided
-DEFAULT_RPC_URL = "https://eth.llamarpc.com"
+DEFAULT_RPC_URL = "https://ethereum-rpc.publicnode.com"
 
 # Web3 instance cache to avoid creating new instances for every request
 _web3_instances = {}
 
 
-def get_web3(rpc_url: str = None, chain_id: int = None) -> Web3:
+def get_web3(rpc_url: Optional[str] = None, chain_id: Optional[int] = None) -> Web3:
     """Get or create a Web3 instance for the given RPC URL and chain ID.
     
     Args:
