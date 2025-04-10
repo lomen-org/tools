@@ -1,89 +1,127 @@
-"""
-Example of using Lomen ERC20 tools with LangGraph.
-
-This example demonstrates how to:
-1. Initialize an ERC20 plugin
-2. Convert the BlockNumberTool to LangChain format
-3. Use it in a simple LangGraph
-"""
-
 import os
-from typing import Dict, List, Any
-from dotenv import load_dotenv
-from langchain.tools import BaseTool
-from langchain_core.messages import HumanMessage, AIMessage
-from langgraph.graph import END, StateGraph
+import getpass
+from typing import Annotated, AsyncGenerator
+from typing_extensions import TypedDict
 
-from lomen.plugins.erc20 import ERC20Plugin
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from dotenv import load_dotenv
+
 from lomen.adapters.langchain import LangChainAdapter
+from lomen.plugins.erc20 import ERC20Plugin
+from langchain_openai import ChatOpenAI
+from langgraph.graph import StateGraph
+from langgraph.graph.message import add_messages
+from langgraph.prebuilt import ToolNode, tools_condition
+import uvicorn
+
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Initialize the ERC20 plugin with credentials
-plugin = ERC20Plugin(credentials={
-    "RPC_URL": os.environ.get("ETHEREUM_RPC_URL", "https://eth-mainnet.alchemyapi.io/v2/your-api-key")
-})
 
-# Convert tools to LangChain format
+def _set_env(var: str):
+    if not os.environ.get(var):
+        os.environ[var] = getpass.getpass(f"{var}: ")
+
+
+_set_env("OPENAI_API_KEY")
+
+# Check if required environment variables are set
+required_env_vars = ["OPENAI_API_KEY"]
+missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+if missing_vars:
+    raise ValueError(
+        f"Missing required environment variables: {', '.join(missing_vars)}"
+    )
+
+plugin = ERC20Plugin(
+    credentials={
+        "RPC_URL": os.environ.get(
+            "ETHEREUM_RPC_URL", "https://eth-mainnet.alchemyapi.io/v2/your-api-key"
+        )
+    }
+)
+
 lc_tools = [LangChainAdapter.convert(tool, plugin.credentials) for tool in plugin.tools]
 
-# Simple state type definition for the graph
-class GraphState:
-    messages: List[Any]
-    tools: List[BaseTool]
 
-# Create example functions for the LangGraph
+class State(TypedDict):
+    messages: Annotated[list, add_messages]
 
-def call_block_number_tool(state: Dict[str, Any]) -> Dict[str, Any]:
-    """Call the block number tool and add result to messages."""
-    # Find the block number tool
-    block_number_tool = next(tool for tool in state["tools"] if tool.name == "erc20_block_number")
-    
-    # Execute the tool
-    result = block_number_tool.func()
-    
-    # Add result to the messages
-    state["messages"].append(
-        AIMessage(content=f"The current Ethereum block number is: {result}")
+
+# Initialize LangGraph
+graph_builder = StateGraph(State)
+tools = lc_tools
+
+llm = ChatOpenAI(model="gpt-4o-mini")
+llm_with_tools = llm.bind_tools(tools)
+
+
+def chatbot(state: State):
+    return {"messages": [llm_with_tools.invoke(state["messages"])]}
+
+
+graph_builder.add_node("chatbot", chatbot)
+
+tool_node = ToolNode(tools=tools)
+graph_builder.add_node("tools", tool_node)
+
+graph_builder.add_conditional_edges(
+    "chatbot",
+    tools_condition,
+    "tools",
+)
+
+graph_builder.add_edge("tools", "chatbot")
+graph_builder.set_entry_point("chatbot")
+
+graph = graph_builder.compile()
+
+# Initialize FastAPI
+app = FastAPI(title="Chat API")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+class ChatInput(BaseModel):
+    message: str
+
+    model_config = {
+        "json_schema_extra": {"examples": [{"message": "What is LangGraph?"}]}
+    }
+
+
+async def stream_chat_response(user_input: str) -> AsyncGenerator[str, None]:
+    try:
+        for event in graph.stream(
+            {"messages": [{"role": "user", "content": user_input}]}
+        ):
+            for value in event.values():
+                message = value["messages"][-1]
+                if hasattr(message, "content"):
+                    yield f"data: {message.content}\n\n"
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    yield "data: [DONE]\n\n"
+
+
+@app.post("/chat")
+async def chat_endpoint(chat_input: ChatInput):
+    return StreamingResponse(
+        stream_chat_response(chat_input.message), media_type="text/event-stream"
     )
-    
-    return state
-
-def agent(state: Dict[str, Any]) -> Dict[str, Any]:
-    """Simple agent node that just routes to the block_number tool."""
-    # This would normally be an LLM that decides what to do next
-    return "get_block_number"  # Always route to get_block_number action
-
-# Create a simple LangGraph
-builder = StateGraph(GraphState)
-
-# Add nodes
-builder.add_node("agent", agent)
-builder.add_node("get_block_number", call_block_number_tool)
-
-# Add edges
-builder.add_edge("agent", "get_block_number")
-builder.add_edge("get_block_number", END)
-
-# Compile the graph
-graph = builder.compile()
-
-# Initialize state
-initial_state = {
-    "messages": [HumanMessage(content="What's the current Ethereum block number?")],
-    "tools": lc_tools
-}
-
-# Run the graph
-result = graph.invoke(initial_state)
-
-# Print final messages
-for message in result["messages"]:
-    print(f"{message.type}: {message.content}")
 
 
 if __name__ == "__main__":
-    print("\nLomen ERC20 Tool with LangGraph Example")
-    print("----------------------------------------")
-    print("To run this example, set ETHEREUM_RPC_URL in your .env file.")
+    print("Starting server...")
+    uvicorn.run(app, host="0.0.0.0", port=8000)
