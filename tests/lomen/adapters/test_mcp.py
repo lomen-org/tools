@@ -1,8 +1,10 @@
 """Tests for MCP adapter."""
 
+import asyncio
 from typing import Any, Dict
 
 from pydantic import BaseModel
+import mcp
 
 from lomen.adapters.mcp import MCPAdapter
 from lomen.plugins.base import BaseTool
@@ -30,15 +32,31 @@ class TestTool(BaseTool):
 
 def test_mcp_adapter_conversion():
     """Test MCP adapter correctly converts Lomen tools."""
-    # Convert the tool
-    mcp_tool = MCPAdapter.convert(TestTool, {"API_KEY": "test_key"})
+    # Convert the tool to dictionary format (backward compatibility)
+    tool_dict = MCPAdapter.convert(TestTool, {"API_KEY": "test_key"})
 
-    # Verify basic properties
-    assert mcp_tool["name"] == "test_tool"
-    assert "description" in mcp_tool
-    assert "parameters" in mcp_tool
-    assert "function" in mcp_tool
-
-    # Test execution function
-    result = mcp_tool["function"]({"value": "test_value"})
+    # Verify the returned dictionary format
+    assert isinstance(tool_dict, dict)
+    assert tool_dict["name"] == "test_tool"
+    assert "description" in tool_dict
+    assert "parameters" in tool_dict
+    assert "function" in tool_dict
+    assert callable(tool_dict["function"])
+    
+    # Test execution
+    result = tool_dict["function"]({"value": "test_value"})
     assert result == "Executed with test_value and test_key"
+    
+    # Test create_mcp_tool method (returns proper MCP Tool)
+    mcp_tool = MCPAdapter.create_mcp_tool(TestTool, {"API_KEY": "test_key"})
+    
+    # Verify it's an instance of mcp.Tool
+    assert isinstance(mcp_tool, mcp.Tool)
+    assert mcp_tool.name == "test_tool"
+    assert mcp_tool.description is not None
+    
+    # MCP Tool does not directly have a 'function' attribute
+    # It's a proper Pydantic model with 'name', 'description', and 'inputSchema'
+    assert mcp_tool.name == "test_tool"
+    assert mcp_tool.description == "Test tool for MCP adapter."
+    assert "value" in mcp_tool.inputSchema["properties"]
