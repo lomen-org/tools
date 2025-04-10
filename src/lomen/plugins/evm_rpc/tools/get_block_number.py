@@ -14,63 +14,6 @@ class GetBlockNumberTool(BaseTool):
     These are the supported chains and it's RPC and chainId.
     Whenever you are using a chain, you can use the RPC URL and chainId to connect to the chain.
     Do not just use chainId, but use the RPC URL as well.
-
-    - **Ethereum Mainnet**
-    - Chain ID: 1
-    - RPC URL: https://ethereum-rpc.publicnode.com
-
-    - **BNB Smart Chain**
-    - Chain ID: 56
-    - RPC URL: https://bsc-rpc.publicnode.com
-
-    - **Polygon**
-    - Chain ID: 137
-    - RPC URL: https://polygon-rpc.com
-
-    - **Avalanche**
-    - Chain ID: 43114
-    - RPC URL: https://api.avax.network/ext/bc/C/rpc
-
-    - **Arbitrum One**
-    - Chain ID: 42161
-    - RPC URL: https://arb1.arbitrum.io/rpc
-
-    - **Optimism**
-    - Chain ID: 10
-    - RPC URL: https://mainnet.optimism.io
-
-    - **Gnosis Chain**
-    - Chain ID: 100
-    - RPC URL: https://rpc.gnosischain.com
-
-    - **Cronos**
-    - Chain ID: 25
-    - RPC URL: https://mainnet.cronoslabs.com/v1/02594d9ef6c0f4403a5374c3977725d62ffc4841113598314dfa58f8c88638ba
-
-    - **zkSync Era**
-    - Chain ID: 324
-    - RPC URL: https://mainnet.era.zksync.io
-
-    - **Base**
-    - Chain ID: 8453
-    - RPC URL: https://mainnet.base.org
-
-    - **Linea**
-    - Chain ID: 59144
-    - RPC URL: https://linea-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161
-
-    - **Mantle**
-    - Chain ID: 5000
-    - RPC URL: https://rpc.mantle.xyz
-
-    - **Scroll**
-    - Chain ID: 53431
-    - RPC URL: https://rpc.scroll.io
-
-    - **Celo**
-
-    - Chain ID: 42220
-    - RPC URL: https://forno.celo.org
     """
 
     name = "evm_get_block_number"
