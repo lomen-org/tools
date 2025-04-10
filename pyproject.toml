@@ -28,6 +28,7 @@ dependencies = [
     "fastapi>=0.115.12",
     "langchain-community>=0.3.21",
     "uvicorn>=0.34.0",
+    "mcp>=1.6.0",
 ]
 
 [project.urls]
