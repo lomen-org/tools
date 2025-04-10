@@ -42,13 +42,22 @@ block_number = BlockNumberTool.execute(
 print(f"Current block number: {block_number}")
 
 # Use with LangChain
-from lomen.adapters.langchain import LangChainAdapter
+lc_tools = plugin.get_langchain_tools()
 
-lc_tools = [LangChainAdapter.convert(tool, plugin.credentials) 
-           for tool in plugin.tools]
-
-# Use with your LangChain agent
+# Use with your LangChain agent or LangGraph
 # agent = Agent(tools=lc_tools, ...)
+
+# Use with MCP (Model Context Protocol)
+from mcp.server.fastmcp import FastMCP
+
+# Initialize MCP server
+mcp_server = FastMCP("my_plugin")
+
+# Register tools with the MCP server
+plugin.get_mcp_tools(server=mcp_server)
+
+# Run the MCP server
+mcp_server.run(transport="stdio")  # or other transport methods
 ```
 
 ## Creating Custom Plugins

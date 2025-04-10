@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-from lomen.adapters.langchain import LangChainAdapter
+# No need to import LangChainAdapter - we'll use the plugin's method
 from lomen.plugins.erc20 import ERC20Plugin
 from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph
@@ -45,7 +45,8 @@ plugin = ERC20Plugin(
     }
 )
 
-lc_tools = [LangChainAdapter.convert(tool, plugin.credentials) for tool in plugin.tools]
+# Get tools in LangChain format using the plugin's get_langchain_tools method
+lc_tools = plugin.get_langchain_tools()
 
 
 class State(TypedDict):
