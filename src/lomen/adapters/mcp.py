@@ -80,6 +80,43 @@ class MCPAdapter:
         }
         
     @staticmethod
+    def register_with_server(
+        tool_cls: Type[BaseTool], credentials: Dict[str, Any], server
+    ) -> None:
+        """
+        Register a Lomen tool directly with an MCP server.
+        
+        This uses the server's decorator pattern to register the tool,
+        which is the recommended approach in the MCP documentation.
+        
+        Args:
+            tool_cls: The Lomen tool class to register
+            credentials: The credentials to use with the tool
+            server: An MCP server instance (FastMCP)
+            
+        Returns:
+            None
+        """
+        tool_name = tool_cls.name
+        tool_description = getattr(tool_cls, "__doc__", "") or f"Tool for {tool_name}"
+        
+        # Use the server's tool decorator to register the tool function
+        @server.tool(name=tool_name, description=tool_description)
+        async def tool_function(**kwargs):
+            """Dynamic tool function for the MCP server."""
+            # Create Params object if the tool expects it
+            if hasattr(tool_cls, "Params"):
+                params = tool_cls.Params(**kwargs) if kwargs else tool_cls.Params()
+                result = tool_cls.execute(params, credentials)
+            else:
+                # Direct execution if no Params class is defined
+                result = tool_cls.execute(kwargs, credentials)
+            return result
+        
+        # The decorator registers the tool with the server
+        # No return value needed
+    
+    @staticmethod
     def create_mcp_tool(
         tool_cls: Type[BaseTool], credentials: Dict[str, Any]
     ) -> mcp.Tool:
