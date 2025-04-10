@@ -21,12 +21,13 @@ class GetBlockNumberTool(BaseTool):
     class Params(BaseModel):
         """Parameters for getting the current block number."""
 
-        rpc_url: str = Field(
+        rpc_url: Optional[str] = Field(
             None,
-            description="The RPC URL to use for the request. If not provided, will use the default RPC URL.",
+            description="The RPC URL to use for the request. If not provided, will use the default RPC URL."
         )
-        chain_id: int = Field(
-            1, description="The chain ID to use. Defaults to 1 (Ethereum mainnet)"
+        chain_id: Optional[int] = Field(
+            None,
+            description="The chain ID to use. Defaults to 1 (Ethereum mainnet)"
         )
 
     @classmethod

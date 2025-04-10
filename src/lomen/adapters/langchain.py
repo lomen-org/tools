@@ -1,10 +1,11 @@
 """LangChain adapter for Lomen tools."""
 
-from typing import Any, Dict, Type, Union
+from typing import Any, Dict, Type, Union, List
 
 from langchain_core.tools import BaseTool, StructuredTool
 
 from ..plugins.base import BaseTool as LomenBaseTool
+from ..plugins.base import BasePlugin
 
 
 class LangChainAdapter:
@@ -34,3 +35,22 @@ class LangChainAdapter:
             func=_execute_tool,
             args_schema=tool_args_schema,
         )
+        
+    @staticmethod
+    def get_langchain_tools(plugins: List[BasePlugin]) -> List[BaseTool]:
+        """
+        Convert multiple plugins' tools to LangChain format.
+        
+        Args:
+            plugins: List of plugin instances to convert
+            
+        Returns:
+            List of LangChain tools from all plugins
+        """
+        all_tools = []
+        for plugin in plugins:
+            for tool_cls in plugin.tools:
+                all_tools.append(
+                    LangChainAdapter.convert(tool_cls, plugin.credentials)
+                )
+        return all_tools

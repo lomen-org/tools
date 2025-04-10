@@ -32,9 +32,8 @@ evm_rpc_plugin = EvmRpcPlugin()
 blockchain_plugin = BlockchainPlugin()
 
 # Get all tools in LangChain format
-all_tools = []
-all_tools.extend(evm_rpc_plugin.get_langchain_tools())
-all_tools.extend(blockchain_plugin.get_langchain_tools())
+from lomen.adapters.langchain import LangChainAdapter
+all_tools = LangChainAdapter.get_langchain_tools([evm_rpc_plugin, blockchain_plugin])
 
 # Define a custom system prompt for the chain
 PROMPT = """You are an expert blockchain assistant specializing in various blockchain networks. 

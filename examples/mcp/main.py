@@ -19,8 +19,8 @@ blockchain_plugin = BlockchainPlugin()
 mcp_server = FastMCP("lomen")
 
 # Register all plugin tools with the MCP server
-evm_rpc_plugin.get_mcp_tools(server=mcp_server)
-blockchain_plugin.get_mcp_tools(server=mcp_server)
+from lomen.adapters.mcp import MCPAdapter
+MCPAdapter.get_mcp_tools([evm_rpc_plugin, blockchain_plugin], server=mcp_server)
 
 if __name__ == "__main__":
     # Run the API with uvicorn

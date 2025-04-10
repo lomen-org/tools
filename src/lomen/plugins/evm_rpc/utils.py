@@ -32,7 +32,8 @@ def get_web3(rpc_url: Optional[str] = None, chain_id: Optional[int] = None) -> W
         # Verify chain ID if specified
         if chain_id is not None:
             chain_id_from_node = web3.eth.chain_id
-            if chain_id_from_node != chain_id:
+            # Convert both to strings for comparison to handle type differences
+            if str(chain_id_from_node) != str(chain_id):
                 raise Exception(
                     f"Chain ID mismatch. Expected {chain_id}, got {chain_id_from_node}"
                 )

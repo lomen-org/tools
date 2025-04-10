@@ -1,13 +1,13 @@
 """MCP adapter for Lomen tools."""
 
 import inspect
-from typing import Any, Dict, Type, List, Callable, get_type_hints
+from typing import Any, Dict, Type, List, Callable, get_type_hints, Optional
 import json
 
 import mcp
 from pydantic import create_model, BaseModel
 
-from ..plugins.base import BaseTool
+from ..plugins.base import BaseTool, BasePlugin
 
 
 class MCPAdapter:
@@ -101,6 +101,7 @@ class MCPAdapter:
         tool_description = getattr(tool_cls, "__doc__", "") or f"Tool for {tool_name}"
         
         # Use the server's tool decorator to register the tool function
+        # The MCP server decorator doesn't accept a schema parameter
         @server.tool(name=tool_name, description=tool_description)
         async def tool_function(**kwargs):
             """Dynamic tool function for the MCP server."""
@@ -166,11 +167,39 @@ class MCPAdapter:
                 return tool_cls.execute(kwargs, credentials)
         
         # Create the Tool instance
-        # The exact way to create a Tool depends on the MCP version, 
-        # but inputSchema is required 
         return mcp.Tool(
             name=tool_name,
             description=tool_description,
             inputSchema=input_schema,
-            func=async_tool
+            func=async_tool,
         )
+        
+    @staticmethod
+    def get_mcp_tools(
+        plugins: List[BasePlugin], server=None
+    ) -> Optional[List[mcp.Tool]]:
+        """
+        Convert multiple plugins' tools to MCP format and optionally register with server.
+        
+        Args:
+            plugins: List of plugin instances to convert
+            server: Optional MCP server to register tools with
+            
+        Returns:
+            List of MCP Tool objects if server is None, otherwise None
+        """
+        # If a server is provided, register all tools with it
+        if server:
+            for plugin in plugins:
+                for tool_cls in plugin.tools:
+                    MCPAdapter.register_with_server(tool_cls, plugin.credentials, server)
+            return None
+            
+        # Otherwise, create and return MCP Tool objects
+        all_tools = []
+        for plugin in plugins:
+            for tool_cls in plugin.tools:
+                all_tools.append(
+                    MCPAdapter.create_mcp_tool(tool_cls, plugin.credentials)
+                )
+        return all_tools

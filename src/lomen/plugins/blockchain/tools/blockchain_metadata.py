@@ -64,8 +64,8 @@ class BlockchainMetadataTool(BaseTool):
     class Params(BaseModel):
         """Parameters for getting blockchain metadata."""
 
-        chain_id: int = Field(
-            1,
+        chain_id: Union[int, str] = Field(
+            ...,
             description="The chain ID of the blockchain network to get metadata for.",
         )
 
@@ -85,6 +85,7 @@ class BlockchainMetadataTool(BaseTool):
             Exception: If the chain is not found
         """
         try:
+            print("Executing blockchain_metadata tool with chain_id:", params.chain_id)
             # Read chains data from JSON file
             chains_file = os.path.join(
                 os.path.dirname(os.path.dirname(__file__)), "chains.json"

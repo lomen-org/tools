@@ -47,9 +47,12 @@ class GetBlockTool(BaseTool):
         rpc_url: str = Field(
             None,
             description="The RPC URL to use for the request. If not provided, get it from system prompt.",
+            required=True,
         )
         chain_id: int = Field(
-            1, description="The chain ID to use. Defaults to 1 (Ethereum mainnet)"
+            1,
+            description="The chain ID to use. Defaults to 1 (Ethereum mainnet)",
+            required=True,
         )
 
     @classmethod
