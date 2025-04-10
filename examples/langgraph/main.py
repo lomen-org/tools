@@ -11,6 +11,7 @@ from langgraph.prebuilt import ToolExecutor, tools_condition
 
 # Import the plugins
 from lomen.plugins.evm_rpc import EvmRpcPlugin
+from lomen.plugins.blockchain import BlockchainPlugin
 
 # Load environment variables
 from dotenv import load_dotenv
@@ -26,15 +27,17 @@ class AgentState(TypedDict):
     tools: Annotated[Sequence[BaseTool], "Tools the agent has access to"]
 
 
-# Initialize the plugins - no credentials needed for EVM RPC
+# Initialize the plugins - no credentials needed
 evm_rpc_plugin = EvmRpcPlugin()
+blockchain_plugin = BlockchainPlugin()
 
 # Get all tools in LangChain format
 all_tools = []
 all_tools.extend(evm_rpc_plugin.get_langchain_tools())
+all_tools.extend(blockchain_plugin.get_langchain_tools())
 
 # Define a custom system prompt for the chain
-PROMPT = """You are an expert blockchain assistant specializing in Ethereum. 
+PROMPT = """You are an expert blockchain assistant specializing in various blockchain networks. 
 You have access to the following tools:
 
 {tools}
@@ -46,6 +49,34 @@ To use a tool, use the following format:
 ```
 
 Where tool_input is a JSON object with the tool's parameters.
+
+For EVM tools that require chain information, first use the blockchain_metadata tool with the chain ID 
+to get the appropriate RPC URL, and then use that information with the EVM tools.
+
+Here are all supported blockchain networks and their chain IDs:
+
+Mainnets:
+- 1: Ethereum Mainnet (ETH)
+- 10: Optimism (ETH)
+- 25: Cronos Mainnet (CRO)
+- 56: BNB Smart Chain (BNB)
+- 100: Gnosis Chain (xDAI)
+- 137: Polygon (MATIC)
+- 324: zkSync Era (ETH)
+- 5000: Mantle (MNT)
+- 8453: Base (ETH)
+- 42161: Arbitrum One (ETH)
+- 42220: Celo (CELO)
+- 43114: Avalanche C-Chain (AVAX)
+- 59144: Linea (ETH)
+- 534352: Scroll (ETH)
+
+Testnets:
+- 5: Goerli Testnet (ETH)
+- 97: BNB Smart Chain Testnet (BNB)
+- 11155111: Sepolia Testnet (ETH)
+- 80001: Polygon Mumbai Testnet (MATIC)
+- 421613: Arbitrum Goerli Testnet (ETH)
 
 If you need information about blockchains, always use the tools at your disposal.
 Respond in a helpful and concise way.
@@ -101,7 +132,7 @@ async def main():
     # Run the app with a query
     result = await app.ainvoke(
         state, 
-        {"messages": [{"role": "user", "content": "What is the current block number on Ethereum?"}]}
+        {"messages": [{"role": "user", "content": "What is the current block number on Ethereum? First get the metadata for Ethereum Mainnet (chain ID 1), then use that information to get the block number."}]}
     )
     
     # Print the final message
@@ -111,7 +142,7 @@ async def main():
     # Ask another question
     follow_up_result = await app.ainvoke(
         result,  # Use the previous state with conversation history
-        {"messages": result["messages"] + [{"role": "user", "content": "Get information about the latest block"}]}
+        {"messages": result["messages"] + [{"role": "user", "content": "Get information about Polygon (chain ID 137). What's its RPC URL and current block number?"}]}
     )
     
     # Print the follow-up response
