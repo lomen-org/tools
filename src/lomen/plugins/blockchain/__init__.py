@@ -1,9 +1,8 @@
 """Blockchain plugin for Lomen."""
 
-from typing import List, Callable, Dict, Any
-
-from ..base import BasePlugin
-from .tools.blockchain_metadata import blockchain_metadata
+from typing import List
+from lomen.plugins.base import BasePlugin, BaseTool
+from .tools.blockchain_metadata import GetBlockchainMetadata
 
 
 class BlockchainPlugin(BasePlugin):
@@ -19,6 +18,6 @@ class BlockchainPlugin(BasePlugin):
         return "blockchain"
 
     @property
-    def tools(self) -> List[Callable]:
+    def tools(self) -> List[BaseTool]:
         """Return the tools provided by the plugin."""
-        return [blockchain_metadata]
+        return [GetBlockchainMetadata()]

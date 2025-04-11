@@ -1,6 +1,14 @@
 """Base classes for Lomen plugins."""
 
-from typing import List, Callable
+from typing import List
+
+
+class BaseTool:
+    def run(self, *args, **kwargs):
+        raise NotImplementedError("Subclasses must implement this method")
+
+    def get_params(self):
+        raise NotImplementedError("Subclasses must implement this method")
 
 
 class BasePlugin:
@@ -15,6 +23,6 @@ class BasePlugin:
         raise NotImplementedError
 
     @property
-    def tools(self) -> List[Callable]:
+    def tools(self) -> List[BaseTool]:
         """List of tools provided by the plugin."""
         raise NotImplementedError

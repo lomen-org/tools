@@ -11,7 +11,7 @@ from lomen.plugins.evm_rpc import EvmRpcPlugin
 from lomen.adapters.mcp import register_mcp_tools
 
 # Create an MCP server instance with an identifier ("wiki")
-mcp = FastMCP("wiki")
+mcp = FastMCP("Lomen")
 
 # Set up the SSE transport for MCP communication.
 sse = SseServerTransport("/messages/")
