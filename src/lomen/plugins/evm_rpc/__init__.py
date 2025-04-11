@@ -1,20 +1,18 @@
 """EVM RPC plugin for Lomen."""
 
-from typing import List, Type
+from typing import List, Callable, Dict, Optional, Any
 
-from ..base import BasePlugin, BaseTool
+from ..base import BasePlugin
 
 # Import after defining the class to avoid circular imports
-from .tools import GetBlockNumberTool, GetBlockTool
+from .tools.get_block_number import get_block_number
+from .tools.get_block import get_block
 
 
 class EvmRpcPlugin(BasePlugin):
-    """Plugin for EVM RPC operations with Ethereum and other EVM-compatible blockchains.
 
-    This plugin provides tools for interacting with EVM-based blockchains such as Ethereum,
-    Polygon, Arbitrum, and others. It handles the connection to the blockchain via RPC
-    and provides various tools for querying blockchain data.
-    """
+    def __init__(self):
+        pass
 
     @property
     def name(self) -> str:
@@ -22,11 +20,6 @@ class EvmRpcPlugin(BasePlugin):
         return "evm_rpc"
 
     @property
-    def required_credentials(self) -> List[str]:
-        """Return the required credentials for the plugin."""
-        return []  # No required credentials, uses default RPC URL
-
-    @property
-    def tools(self) -> List[Type[BaseTool]]:
+    def tools(self) -> List[Callable]:
         """Return the tools provided by the plugin."""
-        return [GetBlockNumberTool, GetBlockTool]
+        return [get_block_number, get_block]

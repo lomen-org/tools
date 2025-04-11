@@ -1,14 +1,14 @@
 """Blockchain plugin for Lomen."""
 
-from typing import List, Type
+from typing import List, Callable, Dict, Any
 
-from ..base import BasePlugin, BaseTool
-from .tools import BlockchainMetadataTool
+from ..base import BasePlugin
+from .tools.blockchain_metadata import blockchain_metadata
 
 
 class BlockchainPlugin(BasePlugin):
     """Plugin for blockchain metadata and utilities.
-    
+
     This plugin provides tools for working with various blockchain networks,
     including retrieving network metadata like RPC URLs and explorer links.
     """
@@ -19,11 +19,6 @@ class BlockchainPlugin(BasePlugin):
         return "blockchain"
 
     @property
-    def required_credentials(self) -> List[str]:
-        """Return the required credentials for the plugin."""
-        return []  # No required credentials
-
-    @property
-    def tools(self) -> List[Type[BaseTool]]:
+    def tools(self) -> List[Callable]:
         """Return the tools provided by the plugin."""
-        return [BlockchainMetadataTool]
+        return [blockchain_metadata]

@@ -4,132 +4,151 @@
     "rpc": "https://ethereum-rpc.publicnode.com",
     "explorer": "https://etherscan.io",
     "currency": "ETH",
-    "is_testnet": false
+    "is_testnet": false,
+    "is_poa": false
   },
   "5": {
     "name": "Goerli Testnet",
     "rpc": "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
     "explorer": "https://goerli.etherscan.io",
     "currency": "ETH",
-    "is_testnet": true
+    "is_testnet": true,
+    "is_poa": false
   },
   "10": {
     "name": "Optimism",
     "rpc": "https://mainnet.optimism.io",
     "explorer": "https://optimistic.etherscan.io",
     "currency": "ETH",
-    "is_testnet": false
+    "is_testnet": false,
+    "is_poa": false
   },
   "11155111": {
     "name": "Sepolia Testnet",
     "rpc": "https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
     "explorer": "https://sepolia.etherscan.io",
     "currency": "ETH",
-    "is_testnet": true
+    "is_testnet": true,
+    "is_poa": true
   },
   "56": {
     "name": "BNB Smart Chain",
     "rpc": "https://bsc-rpc.publicnode.com",
     "explorer": "https://bscscan.com",
     "currency": "BNB",
-    "is_testnet": false
+    "is_testnet": false,
+    "is_poa": true
   },
   "97": {
     "name": "BNB Smart Chain Testnet",
     "rpc": "https://data-seed-prebsc-1-s1.binance.org:8545/",
     "explorer": "https://testnet.bscscan.com",
     "currency": "BNB",
-    "is_testnet": true
+    "is_testnet": true,
+    "is_poa": true
   },
   "137": {
     "name": "Polygon",
     "rpc": "https://polygon-rpc.com",
     "explorer": "https://polygonscan.com",
     "currency": "MATIC",
-    "is_testnet": false
+    "is_testnet": false,
+    "is_poa": true
   },
   "80001": {
     "name": "Polygon Mumbai Testnet",
     "rpc": "https://rpc-mumbai.maticvigil.com",
     "explorer": "https://mumbai.polygonscan.com",
     "currency": "MATIC",
-    "is_testnet": true
+    "is_testnet": true,
+    "is_poa": true
   },
   "42161": {
     "name": "Arbitrum One",
     "rpc": "https://arb1.arbitrum.io/rpc",
     "explorer": "https://arbiscan.io",
     "currency": "ETH",
-    "is_testnet": false
+    "is_testnet": false,
+    "is_poa": false
   },
   "421613": {
     "name": "Arbitrum Goerli Testnet",
     "rpc": "https://goerli-rollup.arbitrum.io/rpc",
     "explorer": "https://testnet.arbiscan.io",
     "currency": "ETH",
-    "is_testnet": true
+    "is_testnet": true,
+    "is_poa": false
   },
   "43114": {
     "name": "Avalanche C-Chain",
     "rpc": "https://api.avax.network/ext/bc/C/rpc",
     "explorer": "https://snowtrace.io",
     "currency": "AVAX",
-    "is_testnet": false
+    "is_testnet": false,
+    "is_poa": false
   },
   "100": {
     "name": "Gnosis Chain",
     "rpc": "https://rpc.gnosischain.com",
     "explorer": "https://gnosisscan.io",
     "currency": "xDAI",
-    "is_testnet": false
+    "is_testnet": false,
+    "is_poa": true
   },
   "25": {
     "name": "Cronos Mainnet",
     "rpc": "https://evm.cronos.org",
     "explorer": "https://cronoscan.com",
     "currency": "CRO",
-    "is_testnet": false
+    "is_testnet": false,
+    "is_poa": true
   },
   "324": {
     "name": "zkSync Era",
     "rpc": "https://mainnet.era.zksync.io",
     "explorer": "https://explorer.zksync.io",
     "currency": "ETH",
-    "is_testnet": false
+    "is_testnet": false,
+    "is_poa": false
   },
   "8453": {
     "name": "Base",
     "rpc": "https://mainnet.base.org",
     "explorer": "https://basescan.org",
     "currency": "ETH",
-    "is_testnet": false
+    "is_testnet": false,
+    "is_poa": false
   },
   "59144": {
     "name": "Linea",
     "rpc": "https://linea-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
     "explorer": "https://lineascan.build",
     "currency": "ETH",
-    "is_testnet": false
+    "is_testnet": false,
+    "is_poa": false
   },
   "5000": {
     "name": "Mantle",
     "rpc": "https://rpc.mantle.xyz",
     "explorer": "https://explorer.mantle.xyz",
     "currency": "MNT",
-    "is_testnet": false
+    "is_testnet": false,
+    "is_poa": false
   },
   "534352": {
     "name": "Scroll",
     "rpc": "https://rpc.scroll.io",
     "explorer": "https://scrollscan.com",
     "currency": "ETH",
-    "is_testnet": false
+    "is_testnet": false,
+    "is_poa": false
   },
   "42220": {
     "name": "Celo",
     "rpc": "https://forno.celo.org",
     "explorer": "https://explorer.celo.org",
     "currency": "CELO",
-    "is_testnet": false
+    "is_testnet": false,
+    "is_poa": true
   }
 }

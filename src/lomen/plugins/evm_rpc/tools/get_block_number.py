@@ -1,57 +1,28 @@
 """Get block number tool for EVM RPC plugin."""
 
-from typing import Any, Dict, Optional
-
-from pydantic import BaseModel, Field
-
-from ...base import BaseTool
-from ..utils import get_web3
+from web3 import Web3
 
 
-class GetBlockNumberTool(BaseTool):
-    """Tool to fetch the current block number from an EVM blockchain.
-
-    These are the supported chains and it's RPC and chainId.
-    Whenever you are using a chain, you can use the RPC URL and chainId to connect to the chain.
-    Do not just use chainId, but use the RPC URL as well.
+def get_block_number(rpc_url, chain_id):
     """
+    Fetch the current block number from the specified EVM blockchain.
 
-    name = "evm_get_block_number"
+    Args:
+        rpc_url: The RPC URL for the blockchain
+        chain_id: The chain ID for the blockchain
 
-    class Params(BaseModel):
-        """Parameters for getting the current block number."""
+    Returns:
+        Dictionary containing the block number
+    """
+    try:
+        # Get a Web3 instance for the specified RPC URL and chain ID
+        web3 = Web3(Web3.HTTPProvider(rpc_url))
 
-        rpc_url: Optional[str] = Field(
-            None,
-            description="The RPC URL to use for the request. If not provided, will use the default RPC URL."
-        )
-        chain_id: Optional[int] = Field(
-            None,
-            description="The chain ID to use. Defaults to 1 (Ethereum mainnet)"
-        )
+        # Get the current block number
+        block_number = web3.eth.block_number
 
-    @classmethod
-    def execute(cls, params: Params, credentials: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Fetch the current block number from the specified EVM blockchain.
-
-        Args:
-            params: Tool parameters including rpc_url and chain_id
-            credentials: Dictionary of credentials (not used for this tool)
-
-        Returns:
-            Dictionary containing the block number
-        """
-        try:
-            # Get a Web3 instance for the specified RPC URL and chain ID
-            rpc_url = params.rpc_url
-            web3 = get_web3(rpc_url, params.chain_id)
-
-            # Get the current block number
-            block_number = web3.eth.block_number
-
-            return {
-                "block_number": block_number,
-            }
-        except Exception as e:
-            raise Exception(f"Failed to get block number: {str(e)}")
+        return {
+            "block_number": block_number,
+        }
+    except Exception as e:
+        raise Exception(f"Failed to get block number: {str(e)}")

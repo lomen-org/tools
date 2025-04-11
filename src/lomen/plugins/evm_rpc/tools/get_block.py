@@ -1,97 +1,53 @@
 """Get block tool for EVM RPC plugin."""
 
-from typing import Any, Dict, Optional, Union
-
-from pydantic import BaseModel, Field
-
-from ...base import BaseTool
-from ..utils import get_web3
+from typing import Any, Dict
+from web3 import Web3
+from web3.middleware import ExtraDataToPOAMiddleware
 
 
-class GetBlockTool(BaseTool):
-    """Tool to fetch block information from an EVM blockchain.
-
-    This tool retrieves detailed information about a specific block from an
-    Ethereum or other EVM-compatible blockchain. It can get the latest block
-    or a specific block by number.
-
-    The tool provides details such as:
-    - Block hash
-    - Timestamp
-    - Miner address
-    - Gas used/limit
-    - List of transactions (can be full transaction objects or just hashes)
-    - Parent hash
-    - Other block metadata
-
-    Use this tool when you need to:
-    - Analyze specific blocks for transactions
-    - Get block timestamps for time-based analysis
-    - Verify block details or transaction inclusion
-    - Track blockchain metrics over time
+def get_block(
+    rpc_url: str,
+    chain_id: int,
+    block_number: int,
+    full_transactions: bool,
+    is_poa: bool = False,
+) -> Dict[str, Any]:
     """
+    Fetch block information from the specified EVM blockchain.
 
-    name = "evm_get_block"
+    Args:
+        params: Tool parameters including block_number, full_transactions, rpc_url, and chain_id
+        credentials: Dictionary of credentials (not used for this tool)
 
-    class Params(BaseModel):
-        """Parameters for getting block information."""
+    Returns:
+        Dictionary containing block information
+    """
+    try:
+        # Get a Web3 instance for the specified RPC URL and chain ID
+        rpc_url = rpc_url
+        web3 = Web3(Web3.HTTPProvider(rpc_url))
 
-        block_number: Optional[Union[int, str]] = Field(
-            "latest",
-            description="The block number to get information for. Can be a number or 'latest', 'earliest', 'pending'",
-        )
-        full_transactions: Optional[bool] = Field(
-            False,
-            description="Whether to include full transaction objects in the response",
-        )
-        rpc_url: str = Field(
-            None,
-            description="The RPC URL to use for the request. If not provided, get it from system prompt.",
-            required=True,
-        )
-        chain_id: int = Field(
-            1,
-            description="The chain ID to use. Defaults to 1 (Ethereum mainnet)",
-            required=True,
-        )
+        if is_poa:
+            web3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
 
-    @classmethod
-    def execute(cls, params: Params, credentials: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Fetch block information from the specified EVM blockchain.
+        # Get block information
+        block = web3.eth.get_block(block_number, full_transactions=full_transactions)
 
-        Args:
-            params: Tool parameters including block_number, full_transactions, rpc_url, and chain_id
-            credentials: Dictionary of credentials (not used for this tool)
+        # Convert block attributes to dict and handle any Web3.py specific types
+        block_dict = dict(block)
+        for key, value in block_dict.items():
+            if isinstance(value, (bytes, bytearray)):
+                block_dict[key] = value.hex()
+            elif (
+                isinstance(value, list)
+                and value
+                and isinstance(value[0], (bytes, bytearray))
+            ):
+                block_dict[key] = [
+                    item.hex() if isinstance(item, (bytes, bytearray)) else item
+                    for item in value
+                ]
 
-        Returns:
-            Dictionary containing block information
-        """
-        try:
-            # Get a Web3 instance for the specified RPC URL and chain ID
-            rpc_url = params.rpc_url
-            web3 = get_web3(rpc_url, params.chain_id)
-
-            # Get block information
-            block = web3.eth.get_block(
-                params.block_number, full_transactions=params.full_transactions
-            )
-
-            # Convert block attributes to dict and handle any Web3.py specific types
-            block_dict = dict(block)
-            for key, value in block_dict.items():
-                if isinstance(value, (bytes, bytearray)):
-                    block_dict[key] = value.hex()
-                elif (
-                    isinstance(value, list)
-                    and value
-                    and isinstance(value[0], (bytes, bytearray))
-                ):
-                    block_dict[key] = [
-                        item.hex() if isinstance(item, (bytes, bytearray)) else item
-                        for item in value
-                    ]
-
-            return block_dict
-        except Exception as e:
-            raise Exception(f"Failed to get block: {str(e)}")
+        return block_dict
+    except Exception as e:
+        raise Exception(f"Failed to get block: {str(e)}")
