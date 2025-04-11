@@ -4,10 +4,10 @@ from typing import Any, Dict
 from web3 import Web3
 from web3.middleware import ExtraDataToPOAMiddleware
 from lomen.plugins.base import BaseTool
-from pydantic import Field
+from pydantic import Field, BaseModel
 
 
-class GetBlockParams:
+class GetBlockParams(BaseModel):
     rpc_url: str = Field(..., description="The RPC URL for the blockchain")
     chain_id: int = Field(..., description="The chain ID for the blockchain")
     block_number: int = Field(..., description="The block number to fetch")

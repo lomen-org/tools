@@ -3,7 +3,7 @@ from typing import List
 from lomen.plugins.base import BasePlugin, BaseTool
 
 
-def register_mcp_tools(server: FastMCP, plugins: List[BasePlugin]):
+def register_mcp_tools(server: FastMCP, plugins: List[BasePlugin]) -> FastMCP:
     """
     Register tools from plugins to the MCP server.
 

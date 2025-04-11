@@ -2,10 +2,10 @@
 
 from web3 import Web3
 from lomen.plugins.base import BaseTool
-from pydantic import Field
+from pydantic import Field, BaseModel
 
 
-class GetBlockNumberParams:
+class GetBlockNumberParams(BaseModel):
     rpc_url: str = Field(..., description="The RPC URL for the blockchain")
     chain_id: int = Field(..., description="The chain ID for the blockchain")
 

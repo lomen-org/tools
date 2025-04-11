@@ -1,5 +1,10 @@
 import os, json
 from lomen.plugins.base import BaseTool
+from pydantic import BaseModel, Field
+
+
+class GetBlockchainMetadataParams(BaseModel):
+    chain_id: int = Field(..., description="The chain ID for the blockchain")
 
 
 class GetBlockchainMetadata(BaseTool):
@@ -10,7 +15,7 @@ class GetBlockchainMetadata(BaseTool):
     name = "get_blockchain_metadata"
 
     def get_params(self):
-        return None
+        return GetBlockchainMetadataParams
 
     def run(self, chain_id: int):
         """
