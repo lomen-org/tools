@@ -17,12 +17,23 @@ def register_mcp_tools(server: FastMCP, plugins: List[BasePlugin]) -> FastMCP:
         The MCP server instance with the registered tools.
     """
     for plugin in plugins:
-        for tool_interface in plugin.tools:
-            description = ""
-            if hasattr(tool_interface, "run") and callable(tool_interface.run):
-                description = tool_interface.run.__doc__ or ""
-            tool_name = getattr(
-                tool_interface, "name", tool_interface.__class__.__name__
-            )
-            server.add_tool(tool_interface.run, tool_name, description)
+        for tool_instance in plugin.tools:
+            tool_name = getattr(tool_instance, "name", tool_instance.__class__.__name__)
+
+            # All tools should now have 'arun', register it directly
+            if hasattr(tool_instance, "arun") and callable(tool_instance.arun):
+                exec_func = tool_instance.arun
+                description = tool_instance.arun.__doc__ or ""
+
+                # Register the arun method, relying on FastMCP introspection
+                server.add_tool(
+                    exec_func,
+                    name=tool_name,
+                    description=description,
+                )
+            else:
+                print(
+                    f"Warning: Tool '{tool_name}' from plugin '{plugin.name}' has no callable 'run' or 'arun' method."
+                )
+
     return server
