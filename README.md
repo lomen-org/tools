@@ -28,15 +28,15 @@ pip install lomen
 
 ```python
 # Initialize a plugin with credentials
-from lomen.plugins.erc20 import ERC20Plugin
+from lomen.plugins.evm_rpc import EVMRPCPlugin
 
-plugin = ERC20Plugin(credentials={"RPC_URL": "https://your-rpc-url"})
+plugin = EVMRPCPlugin(credentials={"RPC_URL": "https://your-rpc-url"})
 
 # Get the current block number
-from lomen.plugins.erc20.tools import BlockNumberTool
+from lomen.plugins.evm_rpc.tools import GetBlockNumberTool
 
-block_number = BlockNumberTool.execute(
-    BlockNumberTool.Params(),
+block_number = GetBlockNumberTool.execute(
+    GetBlockNumberTool.Params(),
     credentials={"RPC_URL": "https://your-rpc-url"}
 )
 print(f"Current block number: {block_number}")
@@ -98,6 +98,26 @@ class MyPlugin(BasePlugin):
     @property
     def tools(self) -> List[Type[BaseTool]]:
         return [MyCustomTool]
+```
+
+## Contributing
+
+We welcome contributions to Lomen! Please see the [contributing guidelines](CONTRIBUTING.md) for more information.
+
+## Development
+
+To set up for development:
+
+```bash
+# Clone the repository
+git clone https://github.com/username/lomen.git
+cd lomen
+
+# Install with development dependencies
+pip install -e ".[dev]"
+
+# Run tests
+pytest
 ```
 
 ## License

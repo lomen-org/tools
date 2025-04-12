@@ -36,6 +36,15 @@ dependencies = [
 [project.urls]
 "Homepage" = "https://github.com/username/lomen"
 "Bug Tracker" = "https://github.com/username/lomen/issues"
+"Documentation" = "https://github.com/username/lomen#readme"
+
+[project.optional-dependencies]
+dev = [
+    "black>=25.1.0",
+    "pytest>=8.3.5",
+    "ruff>=0.11.4",
+    "pytest-cov>=4.1.0",
+]
 
 [tool.ruff]
 target-version = "py310"
@@ -74,9 +83,3 @@ exclude_lines = [
     "raise ImportError"
 ]
 
-[dependency-groups]
-dev = [
-    "black>=25.1.0",
-    "pytest>=8.3.5",
-    "ruff>=0.11.4",
-]
