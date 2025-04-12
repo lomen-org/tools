@@ -1,62 +1,101 @@
-"""Tests for MCP adapter."""
+"""Tests for the MCP adapter."""
 
-import asyncio
-from typing import Any, Dict
+import pytest
+from unittest.mock import MagicMock, patch
 
-from pydantic import BaseModel
-import mcp
-
-from lomen.adapters.mcp import MCPAdapter
-from lomen.plugins.base import BaseTool
+from lomen.adapters.mcp import register_mcp_tools
+from lomen.plugins.base import BasePlugin, BaseTool
 
 
-# This is a test model, not a test case - rename to fix the warning
-class ParamsModel(BaseModel):
-    """Parameters model for testing."""
-    value: str
-
-
-class TestTool(BaseTool):
-    """Test tool for MCP adapter."""
-
+class MockTool(BaseTool):
+    """Mock tool implementation for testing."""
+    
     name = "test_tool"
-
-    class Params(BaseModel):
-        value: str
-
-    @classmethod
-    def execute(cls, params: Params, credentials: Dict[str, Any]) -> str:
-        """Execute the test tool with params and credentials."""
-        return f"Executed with {params.value} and {credentials['API_KEY']}"
-
-
-def test_mcp_adapter_conversion():
-    """Test MCP adapter correctly converts Lomen tools."""
-    # Convert the tool to dictionary format (backward compatibility)
-    tool_dict = MCPAdapter.convert(TestTool, {"API_KEY": "test_key"})
-
-    # Verify the returned dictionary format
-    assert isinstance(tool_dict, dict)
-    assert tool_dict["name"] == "test_tool"
-    assert "description" in tool_dict
-    assert "parameters" in tool_dict
-    assert "function" in tool_dict
-    assert callable(tool_dict["function"])
     
-    # Test execution
-    result = tool_dict["function"]({"value": "test_value"})
-    assert result == "Executed with test_value and test_key"
+    def run(self, param1: str, param2: int):
+        """Test tool that does nothing."""
+        return {"result": f"{param1}_{param2}"}
     
-    # Test create_mcp_tool method (returns proper MCP Tool)
-    mcp_tool = MCPAdapter.create_mcp_tool(TestTool, {"API_KEY": "test_key"})
+    def get_params(self):
+        """Return parameters for the tool."""
+        return {
+            "param1": {"title": "Param1", "type": "string"},
+            "param2": {"title": "Param2", "type": "integer"}
+        }
+
+
+class MockPlugin(BasePlugin):
+    """Test plugin implementation."""
     
-    # Verify it's an instance of mcp.Tool
-    assert isinstance(mcp_tool, mcp.Tool)
-    assert mcp_tool.name == "test_tool"
-    assert mcp_tool.description is not None
+    # Override __init__ to avoid the warning
+    def __init__(self):
+        # No need to call super().__init__() since it's a pass in the base class
+        pass
     
-    # MCP Tool does not directly have a 'function' attribute
-    # It's a proper Pydantic model with 'name', 'description', and 'inputSchema'
-    assert mcp_tool.name == "test_tool"
-    assert mcp_tool.description == "Test tool for MCP adapter."
-    assert "value" in mcp_tool.inputSchema["properties"]
+    @property
+    def name(self) -> str:
+        """Return the name of the plugin."""
+        return "test"
+    
+    @property
+    def tools(self):
+        """Return the tools provided by the plugin."""
+        return [MockTool()]
+
+
+def test_register_mcp_tools():
+    """Test registering tools with MCP."""
+    # Create a mock MCP server
+    mock_server = MagicMock()
+    mock_server.add_tool = MagicMock()
+    
+    # Create a test plugin
+    plugin = MockPlugin()
+    
+    # Register the plugin with MCP
+    server = register_mcp_tools(mock_server, [plugin])
+    
+    # Verify the tools were registered correctly
+    assert server == mock_server
+    # Check that add_tool was called once with the correct name and description
+    assert mock_server.add_tool.call_count == 1
+    args, _ = mock_server.add_tool.call_args
+    assert args[1] == "test_tool"
+    assert args[2] == "Test tool that does nothing."
+
+
+def test_register_mcp_tools_multiple_plugins():
+    """Test registering tools from multiple plugins."""
+    # Create a mock MCP server
+    mock_server = MagicMock()
+    mock_server.add_tool = MagicMock()
+    
+    # Create mock plugins
+    plugin1 = MagicMock(spec=BasePlugin)
+    tool1 = MagicMock(spec=BaseTool)
+    tool1.name = "tool1"
+    tool1.run.__doc__ = "Tool 1 description"
+    plugin1.tools = [tool1]
+    
+    plugin2 = MagicMock(spec=BasePlugin)
+    tool2 = MagicMock(spec=BaseTool)
+    tool2.name = "tool2"
+    tool2.run.__doc__ = "Tool 2 description"
+    plugin2.tools = [tool2]
+    
+    # Register the plugins with MCP
+    server = register_mcp_tools(mock_server, [plugin1, plugin2])
+    
+    # Verify the tools were registered correctly
+    assert server == mock_server
+    assert mock_server.add_tool.call_count == 2
+    
+    # Check the arguments of the first call
+    args1, _ = mock_server.add_tool.call_args_list[0]
+    assert args1[1] == "tool1"
+    assert args1[2] == "Tool 1 description"
+    
+    # Check the arguments of the second call
+    args2, _ = mock_server.add_tool.call_args_list[1]
+    assert args2[1] == "tool2"
+    assert args2[2] == "Tool 2 description"
