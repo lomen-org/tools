@@ -1,0 +1,117 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Define the permissions needed for this workflow
+permissions:
+  # Required for commenting on pull requests
+  pull-requests: write
+  # Required for codecov uploads and general repo operations
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install uv
+        run: |
+          pip install uv
+
+      - name: Setup Python environment
+        run: |
+          uv venv
+          . .venv/bin/activate
+
+      - name: Install dependencies
+        run: |
+          . .venv/bin/activate
+          uv pip install -e ".[dev]"
+          uv pip install pytest-cov
+
+      - name: Lint with ruff
+        continue-on-error: true
+        run: |
+          . .venv/bin/activate
+          # Run lint check but don't fail the workflow
+          echo "Running lint check (failures won't stop the workflow)..."
+          uv run ruff check .
+
+      - name: Run tests with coverage
+        run: |
+          . .venv/bin/activate
+          uv run pytest --cov=src --cov-report=xml --cov-report=term
+
+      - name: Store coverage report
+        run: |
+          . .venv/bin/activate
+          # Create a simplified coverage report for PR comments
+          uv run coverage report > coverage_report.txt
+
+          # Extract the total coverage percentage for use in PR comments
+          # Use a more reliable extraction method that works across different platforms
+          TOTAL=$(tail -1 coverage_report.txt | awk '{print $NF}' | sed 's/%//')
+          echo "COVERAGE_TOTAL=$TOTAL" >> $GITHUB_ENV
+
+          # Get the full coverage report for PR comments
+          DETAILS=$(cat coverage_report.txt)
+          echo "COVERAGE_DETAILS<<EOF" >> $GITHUB_ENV
+          echo "$DETAILS" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        continue-on-error: true
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
+      - name: Find Comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: Test Coverage Report
+
+      - name: Create or Update Coverage Comment
+        uses: peter-evans/create-or-update-comment@v3
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          edit-mode: replace
+          body: |
+            ## Test Coverage Report
+
+            🧪 Tests have completed with **${{ env.COVERAGE_TOTAL }}%** coverage
+
+            <details>
+            <summary>Coverage Details</summary>
+
+            ```
+            ${{ env.COVERAGE_DETAILS }}
+            ```
+
+            </details>

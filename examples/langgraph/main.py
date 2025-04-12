@@ -1,24 +1,21 @@
-import os
 import getpass
+import os
 from typing import Annotated, AsyncGenerator
-from typing_extensions import TypedDict
 
+import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from dotenv import load_dotenv
-
 from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
-import uvicorn
+from pydantic import BaseModel
+from typing_extensions import TypedDict
 
+from lomen.adapters.langchain import register_langchain_tools
 from lomen.plugins.blockchain import BlockchainPlugin
 from lomen.plugins.evm_rpc import EvmRpcPlugin
-from lomen.adapters.langchain import register_langchain_tools
-
 
 # Load environment variables from .env file
 load_dotenv()

@@ -1,7 +1,7 @@
 """Tests for the LangChain adapter."""
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+
 from langchain_core.tools import StructuredTool
 
 from lomen.adapters.langchain import register_langchain_tools

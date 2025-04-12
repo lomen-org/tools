@@ -1,10 +1,10 @@
 """Get block tool for EVM RPC plugin."""
 
-from typing import Any, Dict
+from pydantic import BaseModel, Field
 from web3 import Web3
 from web3.middleware import ExtraDataToPOAMiddleware
+
 from lomen.plugins.base import BaseTool
-from pydantic import Field, BaseModel
 
 
 class GetBlockParams(BaseModel):
@@ -36,7 +36,8 @@ class GetBlock(BaseTool):
         Fetch block information from the specified EVM blockchain.
 
         Args:
-            params: Tool parameters including block_number, full_transactions, rpc_url, and chain_id
+            params: Tool parameters including block_number, full_transactions, rpc_url,
+            and chain_id
             credentials: Dictionary of credentials (not used for this tool)
 
         Returns:

@@ -1,6 +1,8 @@
-from mcp.server.fastmcp import FastMCP
 from typing import List
-from lomen.plugins.base import BasePlugin, BaseTool
+
+from mcp.server.fastmcp import FastMCP
+
+from lomen.plugins.base import BasePlugin
 
 
 def register_mcp_tools(server: FastMCP, plugins: List[BasePlugin]) -> FastMCP:

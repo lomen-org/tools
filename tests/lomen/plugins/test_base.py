@@ -1,9 +1,10 @@
 """Tests for the base plugin module."""
 
-import pytest
 from unittest.mock import MagicMock
 
-from lomen.plugins.base import BaseTool, BasePlugin
+import pytest
+
+from lomen.plugins.base import BasePlugin, BaseTool
 
 
 def test_base_tool():

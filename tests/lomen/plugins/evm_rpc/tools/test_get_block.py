@@ -1,7 +1,8 @@
 """Tests for the GetBlock tool."""
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from web3.middleware import ExtraDataToPOAMiddleware
 
 from lomen.plugins.evm_rpc.tools.get_block import (
@@ -62,7 +63,7 @@ def test_get_block_run_ethereum(mock_web3_class, sample_block_data):
     assert result["hash"] == "0x123456789abcdef"
     assert result["parentHash"] == "0xabcdef123456789"
     assert "extraData" in result
-    assert isinstance(result["extraData"], str)  # Bytes should be converted to hex string
+    assert isinstance(result["extraData"], str)  # Bytes converted to hex
     
     # Verify the Web3 instance was created correctly
     mock_web3_class.HTTPProvider.assert_called_once_with("https://ethereum-rpc.publicnode.com")
@@ -251,7 +252,7 @@ def test_get_block_run_with_poa(mock_web3_class, sample_block_data):
     tool = GetBlock()
     
     # Run the tool with is_poa=True
-    result = tool.run(
+    tool.run(
         rpc_url="https://ethereum-rpc.publicnode.com",
         chain_id=1,
         block_number=15000000,

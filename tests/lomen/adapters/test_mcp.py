@@ -1,7 +1,6 @@
 """Tests for the MCP adapter."""
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from lomen.adapters.mcp import register_mcp_tools
 from lomen.plugins.base import BasePlugin, BaseTool
