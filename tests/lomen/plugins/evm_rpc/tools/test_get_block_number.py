@@ -1,7 +1,8 @@
 """Tests for the GetBlockNumber tool."""
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from lomen.plugins.evm_rpc.tools.get_block_number import (
     GetBlockNumber,

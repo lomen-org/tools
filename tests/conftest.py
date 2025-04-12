@@ -1,9 +1,8 @@
 """Common test fixtures for Lomen tests."""
 
-import os
-import json
+from unittest.mock import MagicMock
+
 import pytest
-from unittest.mock import MagicMock, patch
 from web3 import Web3
 
 from lomen.plugins.blockchain import BlockchainPlugin

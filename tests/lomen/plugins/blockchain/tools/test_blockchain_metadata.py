@@ -1,9 +1,9 @@
 """Tests for the Blockchain Metadata tool."""
 
-import os
 import json
-import pytest
 from unittest.mock import mock_open, patch
+
+import pytest
 
 from lomen.plugins.blockchain.tools.blockchain_metadata import (
     GetBlockchainMetadata,
@@ -226,7 +226,7 @@ def test_get_blockchain_metadata_run_invalid_chain(mock_file, mock_path):
 @patch("os.path.join")
 @patch("builtins.open", new_callable=mock_open)
 def test_get_blockchain_metadata_run_string_chain_id(mock_file, mock_path):
-    """Test running the GetBlockchainMetadata tool with a chain ID that can't be converted to int."""
+    """Test GetBlockchainMetadata with chain ID that can't be converted to int."""
     # Set up mock path
     mock_path.return_value = "fake/path/chains.json"
     
