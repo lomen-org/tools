@@ -1,8 +1,9 @@
 """Get block number tool for EVM RPC plugin."""
 
+from pydantic import BaseModel, Field
 from web3 import Web3
+
 from lomen.plugins.base import BaseTool
-from pydantic import Field, BaseModel
 
 
 class GetBlockNumberParams(BaseModel):

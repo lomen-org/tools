@@ -3,17 +3,18 @@
 from typing import List
 
 from ..base import BasePlugin, BaseTool
+from .tools.get_block import GetBlock
 
 # Import after defining the class to avoid circular imports
 from .tools.get_block_number import GetBlockNumber
-from .tools.get_block import GetBlock
 
 
 class EvmRpcPlugin(BasePlugin):
     """
     Plugin for interacting with EVM-compatible blockchains using RPC.
 
-    This plugin provides tools for querying blockchain data, such as block numbers and details.
+    This plugin provides tools for querying blockchain data, such as block numbers
+    and details.
     """
 
     @property

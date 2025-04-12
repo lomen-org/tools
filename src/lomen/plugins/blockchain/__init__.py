@@ -1,7 +1,9 @@
 """Blockchain plugin for Lomen."""
 
 from typing import List
+
 from lomen.plugins.base import BasePlugin, BaseTool
+
 from .tools.blockchain_metadata import GetBlockchainMetadata
 
 

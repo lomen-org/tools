@@ -1,14 +1,15 @@
 import sys
-import uvicorn
-from starlette.applications import Starlette
-from starlette.requests import Request
-from starlette.routing import Route, Mount
 
+import uvicorn
 from mcp.server.fastmcp import FastMCP
 from mcp.server.sse import SseServerTransport
+from starlette.applications import Starlette
+from starlette.requests import Request
+from starlette.routing import Mount, Route
+
+from lomen.adapters.mcp import register_mcp_tools
 from lomen.plugins.blockchain import BlockchainPlugin
 from lomen.plugins.evm_rpc import EvmRpcPlugin
-from lomen.adapters.mcp import register_mcp_tools
 
 # Create an MCP server instance with an identifier ("wiki")
 mcp = FastMCP("Lomen")
