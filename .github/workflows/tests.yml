@@ -6,7 +6,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-    # Allow manual triggering
 
 jobs:
   test:
@@ -71,18 +70,16 @@ jobs:
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
-        # Run on GitHub or if ACT_CODECOV_UPLOAD is set to 'true' during local testing
-        if: ${{ !env.ACT || env.ACT_CODECOV_UPLOAD == 'true' }}
         with:
           file: ./coverage.xml
-          fail_ci_if_error: ${{ !env.ACT }} # Don't fail on error during local testing
+          fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
 
       - name: Find Comment
         uses: peter-evans/find-comment@v3
         id: find-comment
-        if: github.event_name == 'pull_request' && !env.ACT
+        if: github.event_name == 'pull_request'
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: "github-actions[bot]"
@@ -90,7 +87,7 @@ jobs:
 
       - name: Create or Update Coverage Comment
         uses: peter-evans/create-or-update-comment@v3
-        if: github.event_name == 'pull_request' && !env.ACT
+        if: github.event_name == 'pull_request'
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
@@ -108,12 +105,3 @@ jobs:
             ```
 
             </details>
-
-      - name: Show coverage report (local testing)
-        if: env.ACT
-        run: |
-          echo "===================== LOCAL TEST RESULTS ====================="
-          echo "Coverage: ${{ env.COVERAGE_TOTAL }}%"
-          echo ""
-          echo "Coverage Details:"
-          cat coverage_report.txt
