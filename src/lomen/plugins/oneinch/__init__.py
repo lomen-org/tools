@@ -21,8 +21,18 @@ class OneInchPlugin(BasePlugin):
     Provides tools for portfolio tracking, token information, NFT data,
     domain resolution, and more across various EVM chains.
 
-    Requires the ONEINCH_API_KEY environment variable to be set.
+    Args:
+        api_key: The API key for the 1inch Developer Portal.
     """
+
+    def __init__(self, api_key: str):
+        """Initializes the plugin with the necessary API key."""
+        if not api_key:
+            raise ValueError(
+                "1inch API key must be provided during plugin initialization."
+            )
+        self.api_key = api_key
+        super().__init__()  # Call parent initializer if needed, though BasePlugin's is empty
 
     @property
     def name(self) -> str:
@@ -31,14 +41,15 @@ class OneInchPlugin(BasePlugin):
 
     @property
     def tools(self) -> List[BaseTool]:
-        """Return the tools provided by the plugin."""
+        """Return the tools provided by the plugin, initialized with the API key."""
+        # Instantiate each tool and pass the stored API key
         return [
-            GetAddressFromDomain(),
-            GetTokenInfoBySymbol(),
-            GetTokenInfoByAddress(),
-            GetPortfolio(),
-            GetPortfolioAllChains(),
-            GetProfitAndLoss(),
-            GetProtocolInvestments(),
-            GetNFTsForAddress(),
+            GetAddressFromDomain(api_key=self.api_key),
+            GetTokenInfoBySymbol(api_key=self.api_key),
+            GetTokenInfoByAddress(api_key=self.api_key),
+            GetPortfolio(api_key=self.api_key),
+            GetPortfolioAllChains(api_key=self.api_key),
+            GetProfitAndLoss(api_key=self.api_key),
+            GetProtocolInvestments(api_key=self.api_key),
+            GetNFTsForAddress(api_key=self.api_key),
         ]

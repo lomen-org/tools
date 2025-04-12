@@ -35,14 +35,18 @@ class GetNFTsForAddress(BaseTool):
 
     name = "get_nfts_for_address"
 
+    def __init__(self, api_key: str):
+        """Initializes the tool with the 1inch API key."""
+        if not api_key:
+            raise ValueError("API key must be provided to GetNFTsForAddress tool.")
+        self.api_key = api_key
+
     def get_params(self) -> Type[BaseModel]:
         """Returns the Pydantic schema for the tool's arguments."""
         return GetNFTsForAddressParams
 
-    async def _call_api(
-        self, address: str, chain_ids: List[int], limit: int, api_key: str
-    ):
-        """Internal async method to call the 1inch API."""
+    async def _call_api(self, address: str, chain_ids: List[int], limit: int):
+        """Internal async method to call the 1inch API using the stored key."""
         if not address:
             raise ValueError("Wallet address must be provided.")
         if not chain_ids:
@@ -55,14 +59,11 @@ class GetNFTsForAddress(BaseTool):
             raise ValueError(
                 f"Unsupported chain IDs provided: {invalid_chains}. Supported: {NFT_SUPPORTED_CHAIN_IDS_STR}"
             )
-        if not api_key:
-            raise ValueError(
-                "1inch API key not found. Set the ONEINCH_API_KEY environment variable."
-            )
+        # API key checked in __init__
         if not 1 <= limit <= 25:
             raise ValueError("Limit must be between 1 and 25.")
 
-        headers = {"Authorization": f"Bearer {api_key}"}
+        headers = {"Authorization": f"Bearer {self.api_key}"}
         # Convert list of ints back to comma-separated string for API
         chain_ids_str = ",".join(map(str, chain_ids))
         endpoint = f"https://api.1inch.dev/nft/v2/byaddress?chainIds={chain_ids_str}&address={address}&limit={limit}"
@@ -108,14 +109,11 @@ class GetNFTsForAddress(BaseTool):
         # Ensure limit is within bounds even if default is used
         actual_limit = max(1, min(limit or 25, 25))
 
-        api_key = os.getenv("ONEINCH_API_KEY")
+        # API key is now accessed via self.api_key
         try:
             # Directly await the internal async method
             result = await self._call_api(
-                address=address,
-                chain_ids=chain_ids,
-                limit=actual_limit,
-                api_key=api_key,
+                address=address, chain_ids=chain_ids, limit=actual_limit
             )
             return result
         except (ValueError, PermissionError) as e:

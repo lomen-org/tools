@@ -28,6 +28,12 @@ class GetTokenInfoBySymbol(BaseTool):
 
     name = "get_token_info_by_symbol"
 
+    def __init__(self, api_key: str):
+        """Initializes the tool with the 1inch API key."""
+        if not api_key:
+            raise ValueError("API key must be provided to GetTokenInfoBySymbol tool.")
+        self.api_key = api_key
+
     def get_params(self) -> Type[BaseModel]:
         """Returns the Pydantic schema for the tool's arguments."""
         return GetTokenInfoBySymbolParams
@@ -57,18 +63,15 @@ class GetTokenInfoBySymbol(BaseTool):
                 )
         return None
 
-    async def _call_api(self, symbol: str, chain_id: int, api_key: str):
-        """Internal async method to call the 1inch API."""
+    async def _call_api(self, symbol: str, chain_id: int):
+        """Internal async method to call the 1inch API using the stored key."""
         if not symbol:
             raise ValueError("Token symbol must be provided.")
         if not chain_id:
             raise ValueError("Chain ID must be provided.")
-        if not api_key:
-            raise ValueError(
-                "1inch API key not found. Set the ONEINCH_API_KEY environment variable."
-            )
+        # API key checked in __init__
 
-        headers = {"Authorization": f"Bearer {api_key}"}
+        headers = {"Authorization": f"Bearer {self.api_key}"}
         # Parameters from original code
         only_positive_rating = True
         country = "US"
@@ -122,12 +125,10 @@ class GetTokenInfoBySymbol(BaseTool):
         print(
             f"Token '{symbol}' not in cache for chain {chain_id}, querying 1inch API..."
         )
-        api_key = os.getenv("ONEINCH_API_KEY")
+        # API key is now accessed via self.api_key
         try:
             # Directly await the internal async method
-            result = await self._call_api(
-                symbol=symbol, chain_id=chain_id, api_key=api_key
-            )
+            result = await self._call_api(symbol=symbol, chain_id=chain_id)
             return result
         except (ValueError, PermissionError) as e:
             raise e
@@ -146,22 +147,25 @@ class GetTokenInfoByAddress(BaseTool):
 
     name = "get_token_info_by_address"
 
+    def __init__(self, api_key: str):
+        """Initializes the tool with the 1inch API key."""
+        if not api_key:
+            raise ValueError("API key must be provided to GetTokenInfoByAddress tool.")
+        self.api_key = api_key
+
     def get_params(self) -> Type[BaseModel]:
         """Returns the Pydantic schema for the tool's arguments."""
         return GetTokenInfoByAddressParams
 
-    async def _call_api(self, token_address: str, chain_id: int, api_key: str):
-        """Internal async method to call the 1inch API."""
+    async def _call_api(self, token_address: str, chain_id: int):
+        """Internal async method to call the 1inch API using the stored key."""
         if not token_address:
             raise ValueError("Token address must be provided.")
         if not chain_id:
             raise ValueError("Chain ID must be provided.")
-        if not api_key:
-            raise ValueError(
-                "1inch API key not found. Set the ONEINCH_API_KEY environment variable."
-            )
+        # API key checked in __init__
 
-        headers = {"Authorization": f"Bearer {api_key}"}
+        headers = {"Authorization": f"Bearer {self.api_key}"}
         endpoint = f"https://api.1inch.dev/token/v1.2/{chain_id}/custom/{token_address}"
 
         async with aiohttp.ClientSession() as session:
@@ -202,11 +206,11 @@ class GetTokenInfoByAddress(BaseTool):
             PermissionError: If the API key is invalid.
             Exception: For API or network errors.
         """
-        api_key = os.getenv("ONEINCH_API_KEY")
+        # API key is now accessed via self.api_key
         try:
             # Directly await the internal async method
             result = await self._call_api(
-                token_address=token_address, chain_id=chain_id, api_key=api_key
+                token_address=token_address, chain_id=chain_id
             )
             return result
         except (ValueError, PermissionError) as e:

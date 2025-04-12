@@ -32,24 +32,27 @@ class GetProfitAndLoss(BaseTool):
 
     name = "get_profit_and_loss"
 
+    def __init__(self, api_key: str):
+        """Initializes the tool with the 1inch API key."""
+        if not api_key:
+            raise ValueError("API key must be provided to GetProfitAndLoss tool.")
+        self.api_key = api_key
+
     def get_params(self) -> Type[BaseModel]:
         """Returns the Pydantic schema for the tool's arguments."""
         return GetProfitAndLossParams
 
     async def _call_api(
-        self, address: str, chain_id: int, api_key: str, timerange: Optional[str] = None
+        self, address: str, chain_id: int, timerange: Optional[str] = None
     ):
-        """Internal async method to call the 1inch API."""
+        """Internal async method to call the 1inch API using the stored key."""
         if not address:
             raise ValueError("Wallet address must be provided.")
         if not chain_id:
             raise ValueError("Chain ID must be provided.")
-        if not api_key:
-            raise ValueError(
-                "1inch API key not found. Set the ONEINCH_API_KEY environment variable."
-            )
+        # API key checked in __init__
 
-        headers = {"Authorization": f"Bearer {api_key}"}
+        headers = {"Authorization": f"Bearer {self.api_key}"}
         endpoint = f"https://api.1inch.dev/portfolio/portfolio/v4/general/profit_and_loss?addresses={address}&chain_id={chain_id}"
         if timerange:
             endpoint += f"&timerange={timerange}"
@@ -96,14 +99,11 @@ class GetProfitAndLoss(BaseTool):
             PermissionError: If the API key is invalid.
             Exception: For API or network errors.
         """
-        api_key = os.getenv("ONEINCH_API_KEY")
+        # API key is now accessed via self.api_key
         try:
             # Directly await the internal async method
             result = await self._call_api(
-                address=address,
-                chain_id=chain_id,
-                api_key=api_key,
-                timerange=timerange,
+                address=address, chain_id=chain_id, timerange=timerange
             )
             return result
         except (ValueError, PermissionError) as e:

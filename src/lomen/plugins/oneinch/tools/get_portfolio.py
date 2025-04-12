@@ -52,12 +52,18 @@ class GetPortfolio(BaseTool):
 
     name = "get_portfolio"
 
+    def __init__(self, api_key: str):
+        """Initializes the tool with the 1inch API key."""
+        if not api_key:
+            raise ValueError("API key must be provided to GetPortfolio tool.")
+        self.api_key = api_key
+
     def get_params(self) -> Type[BaseModel]:
         """Returns the Pydantic schema for the tool's arguments."""
         return GetPortfolioParams
 
-    async def _call_api(self, address: str, chain_id: int, api_key: str):
-        """Internal async method to call the 1inch API."""
+    async def _call_api(self, address: str, chain_id: int):
+        """Internal async method to call the 1inch API using the stored key."""
         if not address:
             raise ValueError("Wallet address must be provided.")
         if not chain_id:
@@ -67,12 +73,9 @@ class GetPortfolio(BaseTool):
             raise ValueError(
                 f"Chain ID {chain_id} is not supported by this tool. Supported IDs: {supported_ids}"
             )
-        if not api_key:
-            raise ValueError(
-                "1inch API key not found. Set the ONEINCH_API_KEY environment variable."
-            )
+        # API key checked in __init__
 
-        headers = {"Authorization": f"Bearer {api_key}"}
+        headers = {"Authorization": f"Bearer {self.api_key}"}
         endpoint = f"https://api.1inch.dev/portfolio/portfolio/v4/overview/erc20/details?addresses={address}&chain_id={chain_id}"
 
         async with aiohttp.ClientSession() as session:
@@ -109,12 +112,10 @@ class GetPortfolio(BaseTool):
             PermissionError: If the API key is invalid.
             Exception: For API or network errors.
         """
-        api_key = os.getenv("ONEINCH_API_KEY")
+        # API key is now accessed via self.api_key
         try:
             # Directly await the internal async method
-            result = await self._call_api(
-                address=address, chain_id=chain_id, api_key=api_key
-            )
+            result = await self._call_api(address=address, chain_id=chain_id)
             return result
         except (ValueError, PermissionError) as e:
             raise e
@@ -135,16 +136,20 @@ class GetPortfolioAllChains(BaseTool):
 
     name = "get_portfolio_all_chains"
 
+    def __init__(self, api_key: str):
+        """Initializes the tool with the 1inch API key."""
+        if not api_key:
+            raise ValueError("API key must be provided to GetPortfolioAllChains tool.")
+        self.api_key = api_key
+
     def get_params(self) -> Type[BaseModel]:
         """Returns the Pydantic schema for the tool's arguments."""
         return GetPortfolioForAllChainsParams
 
-    async def _call_individual_chain(
-        self, session, address: str, chain: dict, api_key: str
-    ) -> dict:
-        """Calls the API for a single chain."""
+    async def _call_individual_chain(self, session, address: str, chain: dict) -> dict:
+        """Calls the API for a single chain using the stored key."""
         endpoint = f"https://api.1inch.dev/portfolio/portfolio/v4/overview/erc20/details?addresses={address}&chain_id={chain['id']}"
-        headers = {"Authorization": f"Bearer {api_key}"}
+        headers = {"Authorization": f"Bearer {self.api_key}"}
         try:
             async with session.get(endpoint, headers=headers) as response:
                 if response.status == 401:
@@ -182,23 +187,18 @@ class GetPortfolioAllChains(BaseTool):
                 "error": f"Unexpected Error: {e}",
             }
 
-    async def _call_all_apis(self, address: str, api_key: str):
-        """Internal async method to call the 1inch API for all supported chains."""
+    async def _call_all_apis(self, address: str):
+        """Internal async method to call the 1inch API for all supported chains using the stored key."""
         if not address:
             raise ValueError("Wallet address must be provided.")
-        if not api_key:
-            raise ValueError(
-                "1inch API key not found. Set the ONEINCH_API_KEY environment variable."
-            )
+        # API key checked in __init__
 
         results = []
         async with aiohttp.ClientSession() as session:
             tasks = []
             for chain in INCH1_SUPPORTED_CHAIN_IDS:
                 # Create task for each chain
-                tasks.append(
-                    self._call_individual_chain(session, address, chain, api_key)
-                )
+                tasks.append(self._call_individual_chain(session, address, chain))
                 # Introduce delay between starting tasks to avoid rate limiting
                 await asyncio.sleep(
                     1.1
@@ -228,10 +228,10 @@ class GetPortfolioAllChains(BaseTool):
             ValueError: If the address or API key is missing.
             Exception: For errors during the process.
         """
-        api_key = os.getenv("ONEINCH_API_KEY")
+        # API key is now accessed via self.api_key
         try:
             # Directly await the internal async method
-            result = await self._call_all_apis(address=address, api_key=api_key)
+            result = await self._call_all_apis(address=address)
             return result
         except (
             ValueError,

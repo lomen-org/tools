@@ -1,4 +1,6 @@
 import sys
+import os  # Import os to access environment variables
+from dotenv import load_dotenv  # Import load_dotenv
 
 import uvicorn
 from mcp.server.fastmcp import FastMCP
@@ -19,13 +21,29 @@ mcp = FastMCP("Lomen")
 sse = SseServerTransport("/messages/")
 
 
+# Load environment variables from .env file in the current directory
+load_dotenv()
+
+# Get the API key from environment variable (will be populated by load_dotenv if .env exists)
+oneinch_api_key = os.getenv("ONEINCH_API_KEY")
+if not oneinch_api_key:
+    print("Error: ONEINCH_API_KEY environment variable not set. 1inch tools will fail.")
+    # Decide if you want to exit or continue without 1inch tools
+    # For this example, we'll proceed but the tools will raise errors if called.
+    # sys.exit("Exiting due to missing ONEINCH_API_KEY.")
+
 # Instantiate all plugins
 blockchain_plugin = BlockchainPlugin()
 evm_rpc_plugin = EvmRpcPlugin()
-oneinch_plugin = OneInchPlugin()  # Instantiate the new plugin
+# Pass the API key during instantiation if it exists
+oneinch_plugin = OneInchPlugin(api_key=oneinch_api_key) if oneinch_api_key else None
 
 # Register tools from all plugins
-mcp = register_mcp_tools(mcp, [blockchain_plugin, evm_rpc_plugin, oneinch_plugin])
+# Filter out the oneinch_plugin if the key was missing and it's None
+active_plugins = [
+    p for p in [blockchain_plugin, evm_rpc_plugin, oneinch_plugin] if p is not None
+]
+mcp = register_mcp_tools(mcp, active_plugins)
 
 
 async def handle_sse(request: Request) -> None:
