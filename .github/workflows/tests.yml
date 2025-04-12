@@ -56,7 +56,8 @@ jobs:
           uv run coverage report > coverage_report.txt
 
           # Extract the total coverage percentage for use in PR comments
-          TOTAL=$(grep -m 1 -oP 'TOTAL\s+\d+\s+\d+\s+\d+\s+\d+\s+\K\d+(?=%)' coverage_report.txt || echo "unknown")
+          # Use a more reliable extraction method that works across different platforms
+          TOTAL=$(tail -1 coverage_report.txt | awk '{print $NF}' | sed 's/%//')
           echo "COVERAGE_TOTAL=$TOTAL" >> $GITHUB_ENV
 
           # Get the full coverage report for PR comments
