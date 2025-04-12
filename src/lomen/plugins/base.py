@@ -5,10 +5,23 @@ from typing import List
 
 class BaseTool:
     def run(self, *args, **kwargs):
-        raise NotImplementedError("Subclasses must implement this method")
+        raise NotImplementedError(
+            "Subclasses must implement the 'run' method for synchronous execution."
+        )
+
+    async def arun(self, *args, **kwargs):
+        """Asynchronous execution method (optional)."""
+        # Default implementation raises error, subclasses can override.
+        # We don't raise NotImplementedError immediately to allow checking hasattr(tool, 'arun')
+        # without needing every tool to implement it if only sync is needed.
+        raise NotImplementedError(
+            "This tool does not support asynchronous execution via 'arun'."
+        )
 
     def get_params(self):
-        raise NotImplementedError("Subclasses must implement this method")
+        raise NotImplementedError(
+            "Subclasses must implement the 'get_params' method to define input schema."
+        )
 
 
 class BasePlugin:

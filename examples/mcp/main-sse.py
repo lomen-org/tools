@@ -10,6 +10,7 @@ from starlette.routing import Mount, Route
 from lomen.adapters.mcp import register_mcp_tools
 from lomen.plugins.blockchain import BlockchainPlugin
 from lomen.plugins.evm_rpc import EvmRpcPlugin
+from lomen.plugins.oneinch import OneInchPlugin  # Import the new plugin
 
 # Create an MCP server instance with an identifier ("wiki")
 mcp = FastMCP("Lomen")
@@ -18,7 +19,13 @@ mcp = FastMCP("Lomen")
 sse = SseServerTransport("/messages/")
 
 
-mcp = register_mcp_tools(mcp, [BlockchainPlugin(), EvmRpcPlugin()])
+# Instantiate all plugins
+blockchain_plugin = BlockchainPlugin()
+evm_rpc_plugin = EvmRpcPlugin()
+oneinch_plugin = OneInchPlugin()  # Instantiate the new plugin
+
+# Register tools from all plugins
+mcp = register_mcp_tools(mcp, [blockchain_plugin, evm_rpc_plugin, oneinch_plugin])
 
 
 async def handle_sse(request: Request) -> None:
