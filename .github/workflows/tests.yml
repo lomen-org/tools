@@ -42,7 +42,7 @@ jobs:
       - name: Lint with ruff
         run: |
           . .venv/bin/activate
-          uv run ruff .
+          uv run ruff check .
 
       - name: Run tests with coverage
         run: |
