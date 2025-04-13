@@ -20,9 +20,14 @@ class GetBlockchainMetadata(BaseTool):
     def get_params(self):
         return GetBlockchainMetadataParams
 
-    def run(self, chain_id: int):
+    # Remove the synchronous run method or make it raise NotImplementedError
+    # def run(self, *args, **kwargs):
+    #     raise NotImplementedError("Use the asynchronous 'arun' method.")
+
+    async def arun(self, chain_id: int):
         """
-        Retrieve metadata for the specified blockchain network.
+        Asynchronously retrieve metadata for the specified blockchain network.
+        (Note: Internally uses synchronous file I/O)
 
         Supported chains and its IDs are:
         - Ethereum Mainnet: 1
@@ -55,8 +60,9 @@ class GetBlockchainMetadata(BaseTool):
         Raises:
             Exception: If the chain is not found
         """
+        # This logic remains synchronous (file I/O)
         try:
-            print("Executing blockchain_metadata tool with chain_id:", chain_id)
+            # print("Executing blockchain_metadata tool with chain_id:", chain_id) # Optional print
             # Read chains data from JSON file
             chains_file = os.path.join(
                 os.path.dirname(os.path.dirname(__file__)), "chains.json"

@@ -24,7 +24,11 @@ class GetBlock(BaseTool):
 
     name = "get_block"
 
-    def run(
+    # Remove the synchronous run method or make it raise NotImplementedError
+    # def run(self, *args, **kwargs):
+    #     raise NotImplementedError("Use the asynchronous 'arun' method.")
+
+    async def arun(
         self,
         rpc_url: str,
         chain_id: int,
@@ -33,7 +37,8 @@ class GetBlock(BaseTool):
         is_poa: bool = False,
     ):
         """
-        Fetch block information from the specified EVM blockchain.
+        Asynchronously fetch block information from the specified EVM blockchain.
+        (Note: Internally uses synchronous web3 calls)
 
         Args:
             params: Tool parameters including block_number, full_transactions, rpc_url,
@@ -43,9 +48,10 @@ class GetBlock(BaseTool):
         Returns:
             Dictionary containing block information
         """
+        # This logic remains synchronous as web3 is sync
         try:
             # Get a Web3 instance for the specified RPC URL and chain ID
-            rpc_url = rpc_url
+            # rpc_url = rpc_url # This line is redundant
             web3 = Web3(Web3.HTTPProvider(rpc_url))
 
             if is_poa:
