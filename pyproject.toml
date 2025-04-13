@@ -42,6 +42,8 @@ dependencies = [
 dev = [
     "black>=25.1.0",
     "pytest>=8.3.5",
+    "pytest-asyncio", # For async test support
+    "pytest-mock",    # For mocker fixture
     "ruff>=0.11.4",
     "pytest-cov>=4.1.0",
 ]
@@ -61,6 +63,11 @@ target-version = ["py310"]
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_functions = "test_*"
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "asyncio: mark test as an asyncio test"
+]
 filterwarnings = [
     "ignore::DeprecationWarning:websockets.*:"
 ]
@@ -82,4 +89,3 @@ exclude_lines = [
     "pass",
     "raise ImportError"
 ]
-

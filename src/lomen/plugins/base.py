@@ -6,7 +6,7 @@ from typing import List
 class BaseTool:
     def run(self, *args, **kwargs):
         raise NotImplementedError(
-            "Subclasses must implement the 'run' method for synchronous execution."
+            "Use the asynchronous 'arun' method instead of 'run'."
         )
 
     async def arun(self, *args, **kwargs):
