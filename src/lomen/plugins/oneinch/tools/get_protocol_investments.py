@@ -27,8 +27,17 @@ class GetProtocolInvestments(BaseTool):
     Fetches information about a wallet's investments in various DeFi protocols (e.g., Aave, Uniswap) using the 1inch API.
     """
 
-    name = "get_protocol_investments"
     API_KEY_ENV = "ONEINCH_API_KEY"
+
+    @property
+    def name(self) -> str:
+        """Name of the tool."""
+        return "get_protocol_investments"
+
+    @property
+    def description(self) -> str:
+        """Description of what the tool does."""
+        return "Fetches information about a wallet's investments in various DeFi protocols (e.g., Aave, Uniswap) on a blockchain."
 
     def __init__(self):
         """Initializes the tool by retrieving the API key from environment."""

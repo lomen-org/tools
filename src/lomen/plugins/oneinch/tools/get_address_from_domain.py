@@ -22,8 +22,17 @@ class GetAddressFromDomain(BaseTool):
     Resolves a blockchain domain name (like ENS, Lens) to its associated wallet address using the 1inch API.
     """
 
-    name = "get_address_from_domain"
     API_KEY_ENV = "ONEINCH_API_KEY"
+
+    @property
+    def name(self) -> str:
+        """Name of the tool."""
+        return "get_address_from_domain"
+
+    @property
+    def description(self) -> str:
+        """Description of what the tool does."""
+        return "Resolves a blockchain domain name (like ENS, Lens) to its associated wallet address using the 1inch API."
 
     def __init__(self):
         """Initializes the tool by retrieving the API key from environment."""

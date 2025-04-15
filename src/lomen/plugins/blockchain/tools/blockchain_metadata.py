@@ -15,7 +15,15 @@ class GetBlockchainMetadata(BaseTool):
     Retrieve metadata for the specified blockchain network.
     """
 
-    name = "get_blockchain_metadata"
+    @property
+    def name(self) -> str:
+        """Name of the tool."""
+        return "get_blockchain_metadata"
+
+    @property
+    def description(self) -> str:
+        """Description of what the tool does."""
+        return "Retrieves metadata information for a specified blockchain network, such as RPC URLs and explorer links."
 
     def get_params(self):
         return GetBlockchainMetadataParams

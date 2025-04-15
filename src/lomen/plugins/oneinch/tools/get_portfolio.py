@@ -52,8 +52,17 @@ class GetPortfolio(BaseTool):
     Fetches portfolio information (token balances, value, etc.) for a specific address on a single chain using the 1inch API.
     """
 
-    name = "get_portfolio"
     API_KEY_ENV = "ONEINCH_API_KEY"
+
+    @property
+    def name(self) -> str:
+        """Name of the tool."""
+        return "get_portfolio"
+
+    @property
+    def description(self) -> str:
+        """Description of what the tool does."""
+        return "Fetches portfolio information (token balances, value, etc.) for a specific address on a single blockchain chain."
 
     def __init__(self):
         """Initializes the tool by retrieving the API key from environment."""
@@ -158,8 +167,17 @@ class GetPortfolioAllChains(BaseTool):
     Fetches portfolio information (token balances, value) for a specific address across all supported chains using the 1inch API.
     """
 
-    name = "get_portfolio_all_chains"
     API_KEY_ENV = "ONEINCH_API_KEY"
+
+    @property
+    def name(self) -> str:
+        """Name of the tool."""
+        return "get_portfolio_all_chains"
+
+    @property
+    def description(self) -> str:
+        """Description of what the tool does."""
+        return "Fetches portfolio information (token balances, value) for a specific address across all supported blockchain chains."
 
     def __init__(self):
         """Initializes the tool by retrieving the API key from environment."""
