@@ -153,6 +153,71 @@ if __name__ == "__main__":
 
 _(See the `examples/mcp` directory for a runnable example)_
 
+## Running Lomen MCP Server via CLI
+
+Lomen provides a command-line interface that allows you to easily run an MCP server with your chosen plugins. After installation, you can run the server using the `uvx lomen` command.
+
+### Setting Up API Keys
+
+Before running the server, you need to set up environment variables for the API keys required by your plugins. Each plugin expects its API key in a specific environment variable:
+
+```bash
+# Set environment variables (or use a .env file)
+export ONEINCH_API_KEY=your_1inch_api_key
+export BLOCKCHAIN_API_KEY=your_blockchain_api_key
+export EVMRPC_API_KEY=your_evmrpc_api_key
+```
+
+You can create a `.env` file based on the `.env.example` template included in the project.
+
+### Running the Server
+
+You can run the Lomen MCP server in different ways:
+
+#### 1. Run with All Available Plugins
+
+```bash
+uvx lomen --all
+```
+
+This will attempt to load all available plugins, skipping any that don't have the required API keys set.
+
+#### 2. Run with Specific Plugins
+
+```bash
+uvx lomen --plugins oneinch,blockchain,evmrpc
+```
+
+This will load only the specified plugins.
+
+#### 3. Run with Custom Host/Port
+
+```bash
+uvx lomen --all --host 127.0.0.1 --port 8080
+```
+
+### Usage with MCP-enabled Tools like Cursor/VSCode
+
+To use Lomen with MCP-enabled tools like Cursor or VSCode, add it to your MCP server configuration:
+
+```json
+"mcpServers": {
+  "Lomen": {
+    "command": "uvx",
+    "args": [
+      "lomen",
+      "--all"
+    ],
+    "env": {
+      "LOMEN_ONEINCH_API_KEY": "your_1inch_api_key",
+      "LOMEN_BLOCKCHAIN_API_KEY": "your_blockchain_api_key"
+    }
+  }
+}
+```
+
+This configuration allows MCP-enabled applications to access Lomen's blockchain and web3 tools directly.
+
 ## Creating Custom Plugins
 
 Follow the structure defined in [Core Concepts](#core-concepts).

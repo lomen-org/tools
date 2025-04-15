@@ -23,12 +23,13 @@ class GetAddressFromDomain(BaseTool):
     """
 
     name = "get_address_from_domain"
+    API_KEY_ENV = "ONEINCH_API_KEY"
 
-    def __init__(self, api_key: str):
-        """Initializes the tool with the 1inch API key."""
-        if not api_key:
-            raise ValueError("API key must be provided to GetAddressFromDomain tool.")
-        self.api_key = api_key
+    def __init__(self):
+        """Initializes the tool by retrieving the API key from environment."""
+        self.api_key = os.environ.get(self.API_KEY_ENV)
+        if not self.api_key:
+            raise ValueError(f"{self.API_KEY_ENV} environment variable must be set.")
 
     def get_params(self) -> Type[BaseModel]:
         """Returns the Pydantic schema for the tool's arguments."""
@@ -38,7 +39,6 @@ class GetAddressFromDomain(BaseTool):
         """Internal async method to call the 1inch API using the stored key."""
         if not domain:
             raise ValueError("Domain name must be provided.")
-        # API key is now checked in __init__ and stored in self.api_key
 
         headers = {"Authorization": f"Bearer {self.api_key}"}
         endpoint = f"https://api.1inch.dev/domains/v2.0/lookup?name={domain}"
@@ -78,9 +78,8 @@ class GetAddressFromDomain(BaseTool):
             PermissionError: If the stored API key is invalid.
             Exception: For other API or network errors.
         """
-        # API key is now accessed via self.api_key, fetched during plugin init
         try:
-            # Directly await the internal async method (no need to pass api_key)
+            # Directly await the internal async method
             result = await self._call_api(domain=domain)
             return result
         except (ValueError, PermissionError) as e:

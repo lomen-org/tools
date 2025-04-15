@@ -2,7 +2,7 @@ import asyncio
 import os
 import aiohttp
 from pydantic import BaseModel, Field
-from typing import Type, Optional, List
+from typing import Type, List, Dict, Any, Optional
 
 from lomen.plugins.base import BaseTool
 
@@ -14,113 +14,117 @@ NFT_SUPPORTED_CHAIN_IDS_STR = ", ".join(map(str, NFT_SUPPORTED_CHAIN_IDS))
 # --- Pydantic Schema ---
 class GetNFTsForAddressParams(BaseModel):
     address: str = Field(
-        ..., description="The wallet address (e.g., 0x...) to get NFTs for."
-    )
-    # Store chain_ids as a list of integers for easier validation
-    chain_ids: List[int] = Field(
         ...,
-        description=f"A list of chain IDs to search for NFTs. Supported: {NFT_SUPPORTED_CHAIN_IDS_STR}.",
+        description="The wallet address to check for NFT holdings.",
+        title="Wallet Address",
     )
-    limit: Optional[int] = Field(
-        25, description="Maximum number of NFTs to return (default 25, max 25)."
+    chain_id: int = Field(
+        ...,
+        description="The chain ID (e.g., 1 for Ethereum, 137 for Polygon) to analyze.",
+        title="Chain ID",
     )
 
 
 # --- Tool Implementation ---
 class GetNFTsForAddress(BaseTool):
     """
-    Fetches NFTs owned by a specific wallet address across one or more supported chains using the 1inch API.
-    Supported chains: Ethereum (1), Polygon (137), Arbitrum (42161), Avalanche (43114), Gnosis (100), Klaytn (8217), Optimism (10), Base (8453).
+    Fetches NFT (Non-Fungible Token) holdings for a specific wallet address on a specific chain using the 1inch API.
     """
 
     name = "get_nfts_for_address"
+    API_KEY_ENV = "ONEINCH_API_KEY"
 
-    def __init__(self, api_key: str):
-        """Initializes the tool with the 1inch API key."""
-        if not api_key:
-            raise ValueError("API key must be provided to GetNFTsForAddress tool.")
-        self.api_key = api_key
+    def __init__(self):
+        """Initializes the tool by retrieving the API key from environment."""
+        self.api_key = os.environ.get(self.API_KEY_ENV)
+        if not self.api_key:
+            raise ValueError(f"{self.API_KEY_ENV} environment variable must be set.")
 
     def get_params(self) -> Type[BaseModel]:
         """Returns the Pydantic schema for the tool's arguments."""
         return GetNFTsForAddressParams
 
-    async def _call_api(self, address: str, chain_ids: List[int], limit: int):
+    async def _call_api(self, address: str, chain_id: int):
         """Internal async method to call the 1inch API using the stored key."""
         if not address:
             raise ValueError("Wallet address must be provided.")
-        if not chain_ids:
-            raise ValueError("At least one Chain ID must be provided.")
-        # Validate chain IDs
-        invalid_chains = [
-            cid for cid in chain_ids if cid not in NFT_SUPPORTED_CHAIN_IDS
-        ]
-        if invalid_chains:
-            raise ValueError(
-                f"Unsupported chain IDs provided: {invalid_chains}. Supported: {NFT_SUPPORTED_CHAIN_IDS_STR}"
-            )
-        # API key checked in __init__
-        if not 1 <= limit <= 25:
-            raise ValueError("Limit must be between 1 and 25.")
+        if not chain_id:
+            raise ValueError("Chain ID must be provided.")
 
         headers = {"Authorization": f"Bearer {self.api_key}"}
-        # Convert list of ints back to comma-separated string for API
-        chain_ids_str = ",".join(map(str, chain_ids))
-        endpoint = f"https://api.1inch.dev/nft/v2/byaddress?chainIds={chain_ids_str}&address={address}&limit={limit}"
+        endpoint = f"https://api.1inch.dev/portfolio/v3/{chain_id}/nfts/{address}"
 
         async with aiohttp.ClientSession() as session:
             async with session.get(endpoint, headers=headers) as response:
                 if response.status == 401:
                     raise PermissionError("Invalid or missing 1inch API key.")
-                # Handle 404 - likely means no NFTs found for the address/chain combo
-                if response.status == 404:
-                    return {"result": []}  # Return empty result list
+                if response.status == 400:
+                    error_text = await response.text()
+                    try:
+                        error_data = await response.json()
+                        error_message = error_data.get("description", error_text)
+                        raise ValueError(f"1inch API error: {error_message}")
+                    except:
+                        raise ValueError(f"1inch API error: {error_text}")
                 if response.status != 200:
                     error_text = await response.text()
                     raise Exception(
                         f"1inch API error (Status {response.status}): {error_text}"
                     )
                 data = await response.json()
-                # API returns {"result": [...]}
-                return data  # Return the full response which includes 'result'
+                return data
 
-    # Keep a basic run method for potential sync-only adapters
     def run(self, *args, **kwargs):
         """Synchronous execution is not recommended for this I/O-bound tool. Use arun."""
         raise NotImplementedError("Use the asynchronous 'arun' method for this tool.")
 
-    async def arun(self, address: str, chain_ids: List[int], limit: Optional[int] = 25):
+    async def arun(self, address: str, chain_id: int):
         """
-        Asynchronously fetches NFTs for the given address and chains.
+        Asynchronously retrieves NFT holdings for a wallet on a specific chain.
 
         Args:
-            address: The wallet address.
-            chain_ids: A list of supported chain IDs.
-            limit: Maximum number of NFTs to return (1-25, default 25).
+            address: The wallet address to analyze.
+            chain_id: The chain ID to analyze.
 
         Returns:
-            A dictionary containing the list of NFTs found (usually under the 'result' key).
+            A dictionary containing NFT holdings information for the wallet.
 
         Raises:
-            ValueError: If required parameters, API key are missing, or inputs are invalid.
+            ValueError: If required parameters or API key are missing.
             PermissionError: If the API key is invalid.
             Exception: For API or network errors.
         """
-        # Ensure limit is within bounds even if default is used
-        actual_limit = max(1, min(limit or 25, 25))
-
-        # API key is now accessed via self.api_key
         try:
-            # Directly await the internal async method
-            result = await self._call_api(
-                address=address, chain_ids=chain_ids, limit=actual_limit
-            )
-            return result
+            result = await self._call_api(address=address, chain_id=chain_id)
+
+            # Process and enrich the response
+            processed_result = {
+                "address": address,
+                "chain_id": chain_id,
+                "collections": [],
+                "total_nfts": 0,
+            }
+
+            # Extract NFT collection data
+            if result and isinstance(result, list):
+                for collection in result:
+                    collection_data = {
+                        "name": collection.get("name", "Unknown Collection"),
+                        "address": collection.get("address", ""),
+                        "items": collection.get("items", []),
+                        "item_count": len(collection.get("items", [])),
+                        "floor_price_usd": collection.get("floor_price_usd", 0),
+                    }
+
+                    processed_result["collections"].append(collection_data)
+                    processed_result["total_nfts"] += collection_data["item_count"]
+
+            return processed_result
         except (ValueError, PermissionError) as e:
             raise e
         except aiohttp.ClientError as e:
             raise Exception(f"Network error contacting 1inch API: {e}") from e
         except Exception as e:
             raise Exception(
-                f"Failed to get NFTs for address '{address}' on chains {chain_ids}: {e}"
+                f"Failed to get NFTs for address '{address}' on chain {chain_id}: {e}"
             ) from e

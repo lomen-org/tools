@@ -27,12 +27,13 @@ class GetTokenInfoBySymbol(BaseTool):
     """
 
     name = "get_token_info_by_symbol"
+    API_KEY_ENV = "ONEINCH_API_KEY"
 
-    def __init__(self, api_key: str):
-        """Initializes the tool with the 1inch API key."""
-        if not api_key:
-            raise ValueError("API key must be provided to GetTokenInfoBySymbol tool.")
-        self.api_key = api_key
+    def __init__(self):
+        """Initializes the tool by retrieving the API key from environment."""
+        self.api_key = os.environ.get(self.API_KEY_ENV)
+        if not self.api_key:
+            raise ValueError(f"{self.API_KEY_ENV} environment variable must be set.")
 
     def get_params(self) -> Type[BaseModel]:
         """Returns the Pydantic schema for the tool's arguments."""
@@ -69,7 +70,6 @@ class GetTokenInfoBySymbol(BaseTool):
             raise ValueError("Token symbol must be provided.")
         if not chain_id:
             raise ValueError("Chain ID must be provided.")
-        # API key checked in __init__
 
         headers = {"Authorization": f"Bearer {self.api_key}"}
         # Parameters from original code
@@ -125,7 +125,6 @@ class GetTokenInfoBySymbol(BaseTool):
         print(
             f"Token '{symbol}' not in cache for chain {chain_id}, querying 1inch API..."
         )
-        # API key is now accessed via self.api_key
         try:
             # Directly await the internal async method
             result = await self._call_api(symbol=symbol, chain_id=chain_id)
@@ -146,12 +145,13 @@ class GetTokenInfoByAddress(BaseTool):
     """
 
     name = "get_token_info_by_address"
+    API_KEY_ENV = "ONEINCH_API_KEY"
 
-    def __init__(self, api_key: str):
-        """Initializes the tool with the 1inch API key."""
-        if not api_key:
-            raise ValueError("API key must be provided to GetTokenInfoByAddress tool.")
-        self.api_key = api_key
+    def __init__(self):
+        """Initializes the tool by retrieving the API key from environment."""
+        self.api_key = os.environ.get(self.API_KEY_ENV)
+        if not self.api_key:
+            raise ValueError(f"{self.API_KEY_ENV} environment variable must be set.")
 
     def get_params(self) -> Type[BaseModel]:
         """Returns the Pydantic schema for the tool's arguments."""
@@ -163,7 +163,6 @@ class GetTokenInfoByAddress(BaseTool):
             raise ValueError("Token address must be provided.")
         if not chain_id:
             raise ValueError("Chain ID must be provided.")
-        # API key checked in __init__
 
         headers = {"Authorization": f"Bearer {self.api_key}"}
         endpoint = f"https://api.1inch.dev/token/v1.2/{chain_id}/custom/{token_address}"
@@ -206,9 +205,7 @@ class GetTokenInfoByAddress(BaseTool):
             PermissionError: If the API key is invalid.
             Exception: For API or network errors.
         """
-        # API key is now accessed via self.api_key
         try:
-            # Directly await the internal async method
             result = await self._call_api(
                 token_address=token_address, chain_id=chain_id
             )
