@@ -16,7 +16,15 @@ class GetBlockNumber(BaseTool):
     Fetch the current block number from the specified EVM blockchain.
     """
 
-    name = "get_block_number"
+    @property
+    def name(self) -> str:
+        """Name of the tool."""
+        return "get_block_number"
+
+    @property
+    def description(self) -> str:
+        """Description of what the tool does."""
+        return "Fetches the current block number from the specified EVM blockchain."
 
     # Remove the synchronous run method or make it raise NotImplementedError
     # def run(self, *args, **kwargs):

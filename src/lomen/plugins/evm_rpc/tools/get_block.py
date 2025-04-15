@@ -12,9 +12,9 @@ class GetBlockParams(BaseModel):
     chain_id: int = Field(..., description="The chain ID for the blockchain")
     block_number: int = Field(..., description="The block number to fetch")
     full_transactions: bool = Field(
-        ..., description="Whether to include full transactions"
+        False, description="Whether to include full transactions"
     )
-    is_poa: bool = Field(..., description="Whether the chain is a POA chain")
+    is_poa: bool = Field(False, description="Whether the chain is a POA chain")
 
 
 class GetBlock(BaseTool):
@@ -22,11 +22,15 @@ class GetBlock(BaseTool):
     Fetch block information from the specified EVM blockchain.
     """
 
-    name = "get_block"
+    @property
+    def name(self) -> str:
+        """Name of the tool."""
+        return "get_block"
 
-    # Remove the synchronous run method or make it raise NotImplementedError
-    # def run(self, *args, **kwargs):
-    #     raise NotImplementedError("Use the asynchronous 'arun' method.")
+    @property
+    def description(self) -> str:
+        """Description of what the tool does."""
+        return "Fetches detailed block information from the specified EVM blockchain."
 
     async def arun(
         self,

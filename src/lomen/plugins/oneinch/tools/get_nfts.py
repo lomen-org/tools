@@ -31,8 +31,17 @@ class GetNFTsForAddress(BaseTool):
     Fetches NFT (Non-Fungible Token) holdings for a specific wallet address on a specific chain using the 1inch API.
     """
 
-    name = "get_nfts_for_address"
     API_KEY_ENV = "ONEINCH_API_KEY"
+
+    @property
+    def name(self) -> str:
+        """Name of the tool."""
+        return "get_nfts_for_address"
+
+    @property
+    def description(self) -> str:
+        """Description of what the tool does."""
+        return "Fetches NFT (Non-Fungible Token) holdings for a specific wallet address on a blockchain."
 
     def __init__(self):
         """Initializes the tool by retrieving the API key from environment."""

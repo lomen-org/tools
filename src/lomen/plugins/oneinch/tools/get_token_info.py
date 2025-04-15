@@ -26,8 +26,19 @@ class GetTokenInfoBySymbol(BaseTool):
     It first checks a local cache (`src/lomen/plugins/tokens/{chain_id}.json`) before querying the API.
     """
 
-    name = "get_token_info_by_symbol"
     API_KEY_ENV = "ONEINCH_API_KEY"
+
+    @property
+    def name(self) -> str:
+        """Name of the tool."""
+        return "get_token_info_by_symbol"
+
+    @property
+    def description(self) -> str:
+        """Description of what the tool does."""
+        return (
+            "Fetches detailed token information by its symbol on a specific blockchain."
+        )
 
     def __init__(self):
         """Initializes the tool by retrieving the API key from environment."""
@@ -144,8 +155,17 @@ class GetTokenInfoByAddress(BaseTool):
     Fetches information (symbol, name, decimals, logo, market cap) for a token by its contract address on a specific chain using the 1inch API.
     """
 
-    name = "get_token_info_by_address"
     API_KEY_ENV = "ONEINCH_API_KEY"
+
+    @property
+    def name(self) -> str:
+        """Name of the tool."""
+        return "get_token_info_by_address"
+
+    @property
+    def description(self) -> str:
+        """Description of what the tool does."""
+        return "Fetches detailed token information by its contract address on a specific blockchain."
 
     def __init__(self):
         """Initializes the tool by retrieving the API key from environment."""

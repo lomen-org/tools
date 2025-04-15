@@ -30,8 +30,17 @@ class GetProfitAndLoss(BaseTool):
     Analyzes a wallet's profit and loss information for specific tokens using the 1inch API.
     """
 
-    name = "get_profit_and_loss"
     API_KEY_ENV = "ONEINCH_API_KEY"
+
+    @property
+    def name(self) -> str:
+        """Name of the tool."""
+        return "get_profit_and_loss"
+
+    @property
+    def description(self) -> str:
+        """Description of what the tool does."""
+        return "Analyzes a wallet's profit and loss information for specific tokens on a blockchain."
 
     def __init__(self):
         """Initializes the tool by retrieving the API key from environment."""
