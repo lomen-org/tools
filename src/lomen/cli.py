@@ -45,7 +45,7 @@ def instantiate_plugins(
 ) -> List[BasePlugin]:
     """Instantiate the requested plugins."""
     available_plugins = find_plugins()
-    print(available_plugins)
+
     if all_plugins:
         plugin_names = list(available_plugins.keys())
 
@@ -65,6 +65,13 @@ def instantiate_plugins(
         except Exception as e:
             print(f"Error initializing plugin '{name}': {e}")
     return instances
+
+
+async def print_registered_tools(server: FastMCP):
+    """Print detailed information about registered tools."""
+    registered_tools = await server.list_tools()
+    print("\n=== Registered Tools ===")
+    print(f"Total tools registered: {len(registered_tools)}")
 
 
 def main():
@@ -96,8 +103,11 @@ def main():
 
     args = parser.parse_args()
 
-    # Initialize FastAPI app and MCP server
-    server = FastMCP("Lomen MCP Server")
+    # Initialize the MCP server with proper server_info
+    server = FastMCP(
+        server_info={"name": "Lomen MCP Server", "version": "0.1.1"},
+        capabilities={"resources": {}, "tools": {}},
+    )
 
     # Load the appropriate plugins
     if args.all:
@@ -117,10 +127,15 @@ def main():
             "Error: No plugins could be loaded. Please check your environment variables for API keys and try again."
         )
         sys.exit(1)
-    print(plugins)
+
     # Register the plugin tools with the MCP server
     server = register_mcp_tools(server, plugins)
 
+    # Print information about registered tools
+    asyncio.run(print_registered_tools(server))
+
+    # Run the server using stdio transport
+    print("\nStarting Lomen MCP server with stdio transport...")
     server.run(transport="stdio")
 
 
